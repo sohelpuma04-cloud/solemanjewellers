@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AxT Time Cycle</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AxT Calc">
+    
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/480/bullish.png">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='23 6 13.5 15.5 8.5 10.5 1 18'%3E%3C/polyline%3E%3Cpolyline points='17 6 23 6 23 12'%3E%3C/polyline%3E%3C/svg%3E">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+            margin: 0;
+            perspective: 1000px;
+            overscroll-behavior-y: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* Background & Ticker */
+        #bgCanvas {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+        }
+        .ticker-container {
+            position: fixed; width: 100%; overflow: hidden; z-index: -1;
+            opacity: 0.15; pointer-events: none; display: flex; flex-direction: column;
+            justify-content: space-between; height: 100vh; padding: 20px 0;
+        }
+        .ticker-wrapper { display: flex; width: fit-content; }
+        .ticker-text {
+            font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 4rem;
+            white-space: nowrap; color: transparent; -webkit-text-stroke: 1px rgba(148, 163, 184, 0.5);
+            text-transform: uppercase; padding-right: 50px;
+        }
+        .scroll-left { animation: scrollLeft 60s linear infinite; }
+        .scroll-right { animation: scrollRight 60s linear infinite; }
+        @keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        @keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+        /* General UI Elements */
+        .input-group label {
+            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.25rem; display: block;
+        }
+        .input-field {
+            background-color: rgba(30, 41, 59, 0.8); border: 1px solid #334155; color: white;
+            transition: all 0.3s; z-index: 1; -webkit-appearance: none; border-radius: 0.75rem;
+        }
+        .input-field:focus {
+            outline: none; box-shadow: 0 0 15px rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px); background: rgba(30, 41, 59, 0.95);
+        }
+        
+        .tilt-card {
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(8px);
+            border: 1px solid rgba(51, 65, 85, 0.5); transform-style: preserve-3d;
+            transition: transform 0.1s ease-out, box-shadow 0.3s ease;
+        }
+        .tilt-card:hover {
+            box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.2);
+            border-color: #60a5fa; z-index: 10;
+        }
+
+        /* Tab Navigation */
+        .nav-pill {
+            cursor: pointer; padding: 0.75rem 1.5rem; border-radius: 9999px;
+            font-weight: 600; transition: all 0.3s; color: #94a3b8;
+            background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+        .nav-pill.active {
+            color: white; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4); border-color: rgba(255,255,255,0.2);
+        }
+        /* --- 3D Gallery (Möbius Style) --- */
+        .scene {
+            margin: 60px auto; position: relative; width: 280px; height: 210px;
+            perspective: 1000px;
+        }
+        .carousel {
+            width: 100%; height: 100%; position: absolute;
+            transform-style: preserve-3d; transition: transform 1s;
+        }
+        .carousel__cell {
+            position: absolute; width: 260px; height: 190px; left: 10px; top: 10px;
+            border-radius: 12px; border: 2px solid rgba(96, 165, 250, 0.3);
+            background: rgba(15, 23, 42, 0.9); overflow: hidden; cursor: pointer;
+            transition: all 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backface-visibility: visible;
+        }
+        /* Hover effect slightly reduced to not break the Mobius flow too much */
+        .carousel__cell:hover {
+            border-color: #3b82f6; box-shadow: 0 0 25px rgba(59, 130, 246, 0.6);
+            transform: scale(1.1) translateZ(20px);
+            z-index: 100;
+        }
+        .carousel__cell img { width: 100%; height: 100%; object-fit: cover; }
+        /* Loader */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1); border-top: 3px solid #3b82f6;
+            border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* Photo Modal */
+        #photoModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        #photoModal.active { opacity: 1; pointer-events: auto; }
+        #photoModal img {
+            max-width: 95%; max-height: 85vh; border-radius: 8px;
+            box-shadow: 0 0 50px rgba(59, 130, 246, 0.3); transform: scale(0.95);
+        }
+        .animate-enter { animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .glitch-wrapper { position: relative; display: inline-block; }
+        /* Scanner Animation */
+        .scanner-container {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanner-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #10b981, transparent);
+            box-shadow: 0 0 15px #10b981, 0 0 5px #10b981;
+            z-index: 20;
+            opacity: 0.8;
+            pointer-events: none;
+            animation: scanVertical 3s ease-in-out infinite alternate;
+        }
+        @keyframes scanVertical {
+            0% { top: 0%; opacity: 0.3; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0.3; }
+        }
+        @keyframes pulse-ring { 0% { width: 100%; height: 100%; opacity: 0.8; } 100% { width: 300%; height: 300%; opacity: 0; } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-start p-4 pt-10">
+    
+    <canvas id="bgCanvas"></canvas>
+    
+    <div class="ticker-container">
+        <div class="ticker-wrapper scroll-left"><div class="ticker-text">NIFTY50 ▲ 26100 RELIANCE ▲ 2450 TCS ▼ 3400 HDFCBANK ▲ 1600 INFY ▼ 1400</div></div>
+        <div class="ticker-wrapper scroll-right" style="margin-top: auto;"><div class="ticker-text" style="-webkit-text-stroke: 1px rgba(244, 63, 94, 0.3);">BHARTIARTL ▲ 850 ITC ▲ 450 KOTAKBANK ▼ 1800 L&T ▲ 2900 AXISBANK ▼ 980</div></div>
+    </div>
+
+    <div class="flex gap-4 mb-8 relative z-20 animate-enter">
+        <div class="nav-pill active" onclick="switchTab('calculator')" id="tab-btn-calculator">
+            <i class="fa-solid fa-calculator mr-2"></i> Calculator
+        </div>
+        <div class="nav-pill" onclick="switchTab('gallery')" id="tab-btn-gallery">
+            <i class="fa-solid fa-images mr-2"></i> 3D Gallery
+        </div>
+    </div>
+
+    <div id="calculator-section" class="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
+        <div class="tilt-card animate-enter p-6 rounded-2xl shadow-2xl relative overflow-hidden group hover:border-slate-500/50">
+            <div class="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-orange-500/20 transition-all duration-700"></div>
+            <div class="flex items-start gap-4 mb-6 relative z-10" style="transform: translateZ(20px);">
+                <div class="bg-gradient-to-br from-orange-500 to-red-600 p-3 rounded-xl shadow-lg shadow-orange-500/20">
+                    <i class="fa-solid fa-chart-line text-white text-xl"></i>
+                </div>
+                <div class="glitch-wrapper">
+                    <h1 class="text-2xl font-extrabold text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">AxT Time cycle</h1>
+                    <div class="flex items-center gap-2 mt-1">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30">NIFTY 50</span>
+                        <p class="text-xs text-slate-400 font-medium">First batch, Thank you Abhishek sir</p>
+                    </div>
+                </div>
+            </div>
+            <form id="calcForm" onsubmit="return false;" class="space-y-5 relative z-10">
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="input-group">
+                        <label>Entry Price (₹)</label>
+                        <input type="number" step="any" id="entryPrice" class="input-field w-full p-3 rounded-xl font-mono text-lg shadow-sm" placeholder="Loading...">
+                    </div>
+                    <div class="input-group">
+                        <label>Stop Loss (₹)</label>
+                        <input type="number" step="any" id="stopLoss" class="input-field w-full p-3 rounded-xl font-mono text-lg shadow-sm" placeholder="Loading...">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-5">
+                    <div class="input-group">
+                        <label>Lot Qty</label>
+                        <div class="relative input-wrapper">
+                            <input type="number" step="1" id="lotSize" value="65" class="input-field w-full p-3 rounded-xl font-mono shadow-sm">
+                            <span class="absolute right-3 top-3.5 text-xs text-slate-500 font-bold pointer-events-none z-10">QTY</span>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Risk Amount (₹)</label>
+                        <div class="relative input-wrapper">
+                            <span class="absolute left-3 top-3.5 text-slate-500 z-10">₹</span>
+                            <input type="number" step="any" id="riskAmount" class="input-field w-full p-3 pl-8 rounded-xl font-mono shadow-sm" placeholder="Optional">
+                        </div>
+                    </div>
+                </div>
+                <div id="directionBanner" class="hidden p-3 rounded-xl text-center font-bold text-sm tracking-wide shadow-lg border">DETECTING...</div>
+                <div class="input-group bg-slate-700/30 p-4 rounded-xl border border-slate-600/30 hover:bg-slate-700/40 transition-colors duration-300">
+                    <label class="text-blue-400 font-semibold mb-2">Custom Ratio Target</label>
+                    <div class="flex gap-3 items-center">
+                        <div class="flex items-center bg-slate-800/80 rounded-lg px-3 py-2 border border-slate-600/50 hover:border-blue-400/50 transition-colors input-wrapper">
+                            <span class="text-slate-400 text-sm font-bold mr-2">1 :</span>
+                            <input type="number" step="any" id="customRatio" value="0.63" class="input-field w-20 p-1 rounded bg-transparent border-none text-center font-mono text-sm focus:ring-0 shadow-none !m-0 !h-auto">
+                        </div>
+                        <span class="text-slate-500 text-xs italic">Adjust to see update</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="flex flex-col gap-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="tilt-card p-5 rounded-2xl animate-enter delay-100 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-2">Max Loss (Risk)</div>
+                    <div id="riskPerLot" class="text-xl font-bold font-mono text-rose-400 group-hover:scale-105 transition-transform origin-left relative z-10">₹0.00</div>
+                    <div id="pointsRisk" class="text-xs text-slate-500 mt-2 font-mono relative z-10">0 pts</div>
+                </div>
+                <div class="tilt-card p-5 rounded-2xl animate-enter delay-200 group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="text-slate-400 text-xs uppercase tracking-wider font-semibold mb-2">Max Profit (Reward)</div>
+                    <div id="maxProfitDisplay" class="text-xl font-bold font-mono text-emerald-400 group-hover:scale-105 transition-transform origin-left relative z-10">₹0.00</div>
+                    <div class="flex justify-between items-center mt-2 pt-2 border-t border-slate-700/50 relative z-10">
+                        <span id="targetRatioDisplay" class="text-[10px] text-slate-600 font-mono">1 : 0.63</span>
+                        <span id="pointsGain" class="text-sm font-bold text-emerald-400 font-mono">0 pts</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tilt-card animate-enter delay-300 rounded-2xl overflow-hidden flex-grow flex flex-col shadow-xl hover:shadow-2xl transition-shadow duration-300 scanner-container">
+                <div class="scanner-line"></div>
+                <div class="p-4 bg-slate-900/80 border-b border-slate-700 flex justify-between items-center relative z-10">
+                    <h2 class="font-bold text-slate-200 flex items-center gap-2">
+                        <i class="fa-solid fa-indian-rupee-sign text-emerald-500"></i> Profit Targets
+                    </h2>
+                    <span class="text-[10px] uppercase tracking-wider font-bold text-slate-500 bg-slate-800 px-2 py-1 rounded border border-slate-700 flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live
+                    </span>
+                </div>
+                <div class="overflow-x-auto custom-scroll p-0 flex-grow relative z-10">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-xs text-slate-500 border-b border-slate-700 bg-slate-800/30">
+                                <th class="p-4 font-semibold tracking-wide">RATIO</th>
+                                <th class="p-4 font-semibold tracking-wide">POINTS</th>
+                                <th class="p-4 font-semibold tracking-wide">TARGET (₹)</th>
+                                <th class="p-4 font-semibold tracking-wide text-right">PROFIT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="targetsBody" class="text-sm mono-font divide-y divide-slate-700/50"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-span-full text-center mt-4 animate-enter delay-300">
+            <p class="text-slate-500 text-xs font-semibold tracking-widest uppercase opacity-60">
+                <span id="typed-text" class="typing-cursor text-blue-400"></span>
+            </p>
+        </div>
+    </div>
+    <div id="gallery-section" class="w-full max-w-4xl hidden flex-col items-center relative z-10 pb-20">
+        
+        <div class="tilt-card w-full p-4 rounded-2xl mb-8 flex justify-between items-center animate-enter">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                    <i class="fa-solid fa-camera-retro text-blue-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-white">Event Gallery</h2>
+                    <p class="text-xs text-slate-400" id="gallery-status">Connecting to server...</p>
+                </div>
+            </div>
+            <label class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg cursor-pointer transition-all shadow-lg shadow-blue-600/30 flex items-center gap-2 text-sm font-bold">
+                <span id="upload-text">Upload Photos</span>
+                <div id="upload-loader" class="loader hidden"></div>
+                <input type="file" id="imageUpload" accept="image/*" multiple class="hidden">
+            </label>
+        </div>
+        <div class="scene animate-enter" style="animation-delay: 0.1s;">
+            <div class="carousel" id="carousel">
+                </div>
+        </div>
+        <div class="flex gap-6 mt-16 animate-enter" style="animation-delay: 0.2s;">
+            <button onclick="rotateCarousel(-1)" class="w-14 h-14 rounded-full bg-slate-800 border border-slate-600 text-white hover:bg-blue-600 hover:border-blue-500 hover:scale-110 transition-all shadow-lg flex items-center justify-center text-xl">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <button onclick="rotateCarousel(1)" class="w-14 h-14 rounded-full bg-slate-800 border border-slate-600 text-white hover:bg-blue-600 hover:border-blue-500 hover:scale-110 transition-all shadow-lg flex items-center justify-center text-xl">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div class="mt-8 text-center text-xs text-slate-500 animate-enter" style="animation-delay: 0.3s;">
+             Photos sync automatically with your Hostinger storage <br>
+             <span class="text-slate-600">Hover over photos to pause rotation</span>
+        </div>
+    </div>
+    <div id="photoModal" onclick="closePhotoModal()">
+        <img id="modalImage" src="" alt="Full View">
+    </div>
+    <script>
+        // Load data automatically when the page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+             await loadSettings();
+        });
+
+        // --- TABS ---
+        function switchTab(tabName) {
+            const calcSec = document.getElementById('calculator-section');
+            const gallSec = document.getElementById('gallery-section');
+            const calcBtn = document.getElementById('tab-btn-calculator');
+            const gallBtn = document.getElementById('tab-btn-gallery');
+            if (tabName === 'calculator') {
+                calcSec.classList.remove('hidden');
+                gallSec.classList.remove('flex');
+                gallSec.classList.add('hidden');
+                calcBtn.classList.add('active');
+                gallBtn.classList.remove('active');
+                stopAutoRotate();
+            } else {
+                calcSec.classList.add('hidden');
+                gallSec.classList.remove('hidden');
+                gallSec.classList.add('flex');
+                calcBtn.classList.remove('active');
+                gallBtn.classList.add('active');
+                refreshGallery(); // Fetch images from server
+            }
+        }
+        // --- GALLERY (HOSTINGER READY) ---
+        const carousel = document.getElementById('carousel');
+        let cellCount = 0;
+        let selectedIndex = 0;
+        let cellWidth = 260; // Match CSS width
+        let radius, theta;
+        let images = [];
+        let autoRotateInterval;
+        // Fetch images from scan_images.php
+        async function refreshGallery() {
+            const statusEl = document.getElementById('gallery-status');
+            statusEl.textContent = "Syncing with Hostinger...";
+            
+            try {
+                // Try to fetch from server script
+                const response = await fetch('scan_images.php?t=' + new Date().getTime());
+                if (response.ok) {
+                    const serverImages = await response.json();
+                    if (Array.isArray(serverImages) && serverImages.length > 0) {
+                        images = serverImages.map(img => 'images/' + img);
+                        statusEl.textContent = `${images.length} photos loaded from cloud`;
+                    } else {
+                        statusEl.textContent = "Gallery is empty. Upload a photo!";
+                        images = [];
+                    }
+                } else {
+                    throw new Error("Server script not found");
+                }
+            } catch (err) {
+                console.log("Server sync failed (Demo Mode):", err);
+                statusEl.textContent = "Demo Mode (Server files missing)";
+                // Fallback demo images for preview
+                if (images.length === 0) {
+                    images = [
+                        'https://images.unsplash.com/photo-1611974765270-ca12586343bb?w=500&q=80',
+                        'https://images.unsplash.com/photo-1642543492481-44e81e3914a7?w=500&q=80',
+                        'https://images.unsplash.com/photo-1640340434855-6084b1f4901c?w=500&q=80',
+                        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=500&q=80'
+                    ];
+                }
+            }
+            renderCarousel();
+            startAutoRotate();
+        }
+        function renderCarousel() {
+            carousel.innerHTML = '';
+            cellCount = images.length;
+            
+            images.forEach((src, i) => {
+                const cell = document.createElement('div');
+                cell.className = 'carousel__cell';
+                cell.onclick = () => openPhotoModal(src);
+                
+                const img = document.createElement('img');
+                img.src = src;
+                // If image fails to load (broken link), replace with placeholder
+                img.onerror = function() { this.src = 'https://via.placeholder.com/300?text=Error'; };
+                
+                cell.appendChild(img);
+                carousel.appendChild(cell);
+            });
+            changeCarousel();
+        }
+        function changeCarousel() {
+            if (cellCount === 0) return;
+            theta = 360 / cellCount;
+            // Radius calculation to create a circle
+            radius = Math.round( ( cellWidth / 2 ) / Math.tan( Math.PI / cellCount ) );
+            
+            // Fix for few images to avoid flat look
+            if (cellCount === 1) radius = 0;
+            if (cellCount === 2) radius = cellWidth;
+            
+            for ( let i = 0; i < cellCount; i++ ) {
+                const cell = carousel.children[i];
+                if ( cell ) {
+                    const angle = theta * i;
+                    // REMOVED rotateX to make photos straight (cylinder effect)
+                    cell.style.transform = `rotateY(${angle}deg) translateZ(${radius}px)`;
+                }
+            }
+            // Reset rotation
+            rotateCarousel(0);
+        }
+        function rotateCarousel(direction = 0) {
+            selectedIndex = (selectedIndex + direction + cellCount) % cellCount;
+            const angle = theta * selectedIndex * -1;
+            carousel.style.transform = `translateZ(${-radius}px) rotateY(${angle}deg)`;
+            
+            // UX: If user manually clicks, reset the auto timer
+            if (direction !== 0 && autoRotateInterval) {
+                 clearInterval(autoRotateInterval);
+                 startAutoRotate();
+            }
+        }
+        function startAutoRotate() {
+            if (autoRotateInterval) clearInterval(autoRotateInterval);
+            if (cellCount > 1) {
+                autoRotateInterval = setInterval(() => {
+                    rotateCarousel(1);
+                }, 3000); // Rotate every 3 seconds
+            }
+        }
+        function stopAutoRotate() {
+            if (autoRotateInterval) clearInterval(autoRotateInterval);
+        }
+        
+        // Auto Rotate Pause on Hover
+        const scene = document.querySelector('.scene');
+        scene.addEventListener('mouseenter', stopAutoRotate);
+        scene.addEventListener('mouseleave', () => {
+             // Only restart if gallery is visible
+             if (!document.getElementById('gallery-section').classList.contains('hidden')) {
+                 startAutoRotate();
+             }
+        });
+        // Upload Logic (POST to upload.php, supports multiple files)
+        document.getElementById('imageUpload').addEventListener('change', async function(e) {
+            const files = e.target.files;
+            if (!files.length) return;
+            const uploadText = document.getElementById('upload-text');
+            const loader = document.getElementById('upload-loader');
+            
+            uploadText.textContent = "Uploading...";
+            loader.classList.remove('hidden');
+            try {
+                for (let file of files) {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    const response = await fetch('upload.php', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const result = await response.json();
+                    if (result.status !== 'success') {
+                        console.error('Upload failed for', file.name, ':', result.message);
+                    }
+                }
+                // Refresh gallery from server after all uploads
+                await refreshGallery();
+                uploadText.textContent = "Success!";
+                setTimeout(() => uploadText.textContent = "Upload Photos", 2000);
+            } catch (err) {
+                console.error(err);
+                alert("Upload failed. Make sure upload.php is on the server.");
+                uploadText.textContent = "Upload Photos";
+            } finally {
+                loader.classList.add('hidden');
+            }
+        });
+        // Modal
+        const photoModal = document.getElementById('photoModal');
+        const modalImage = document.getElementById('modalImage');
+        function openPhotoModal(src) {
+            stopAutoRotate();
+            modalImage.src = src;
+            photoModal.classList.add('active');
+        }
+        function closePhotoModal() {
+            photoModal.classList.remove('active');
+            startAutoRotate();
+        }
+        // --- CALCULATOR ---
+        const entryInput = document.getElementById('entryPrice');
+        const stopInput = document.getElementById('stopLoss');
+        const riskAmountInput = document.getElementById('riskAmount');
+        const customRatioInput = document.getElementById('customRatio');
+        const lotSizeInput = document.getElementById('lotSize');
+        const directionBanner = document.getElementById('directionBanner');
+        const riskPerLotDisplay = document.getElementById('riskPerLot');
+        const pointsRiskDisplay = document.getElementById('pointsRisk');
+        const maxProfitDisplay = document.getElementById('maxProfitDisplay');
+        const pointsGainDisplay = document.getElementById('pointsGain');
+        const targetsBody = document.getElementById('targetsBody');
+        const targetRatioDisplay = document.getElementById('targetRatioDisplay');
+        function animateValue(obj, start, end, duration, prefix = "") {
+            if (start === end) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const currentVal = start + (end - start) * progress;
+                let formatted;
+                if (Number.isInteger(end) && end < 10000) {
+                      formatted = Math.floor(currentVal);
+                } else {
+                      formatted = currentVal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                }
+                obj.textContent = prefix + formatted;
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+        let prevRiskPerLot = 0;
+        let prevMaxProfit = 0;
+        function calculate() {
+            const entry = parseFloat(entryInput.value);
+            const stop = parseFloat(stopInput.value);
+            const customRatio = parseFloat(customRatioInput.value) || 0;
+            const lotSize = parseFloat(lotSizeInput.value) || 65;
+            
+            if (isNaN(entry) || isNaN(stop)) return;
+            let isLong = entry > stop;
+            let directionText = isLong ? "LONG (BUY) SETUP" : "SHORT (SELL) SETUP";
+            let colorClass = isLong
+                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-emerald-900/20"
+                : "bg-rose-500/10 text-rose-400 border border-rose-500/30 shadow-rose-900/20";
+            
+            directionBanner.className = `p-3 rounded-xl text-center font-bold text-sm tracking-wide shadow-lg transform transition-all duration-300 border ${colorClass}`;
+            directionBanner.innerHTML = `${directionText} <i class="fa-solid ${isLong ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down'} ml-2"></i>`;
+            directionBanner.classList.remove('hidden');
+            const pointsRisk = Math.abs(entry - stop);
+            const totalRiskPerLot = pointsRisk * lotSize;
+            
+            animateValue(riskPerLotDisplay, prevRiskPerLot, totalRiskPerLot, 500, "₹");
+            prevRiskPerLot = totalRiskPerLot;
+            pointsRiskDisplay.textContent = `${pointsRisk.toFixed(2)} pts (SL)`;
+            
+            const profitPoints = pointsRisk * 2;
+            const totalMaxProfit = profitPoints * lotSize;
+            
+            animateValue(maxProfitDisplay, prevMaxProfit, totalMaxProfit, 500, "₹");
+            prevMaxProfit = totalMaxProfit;
+            pointsGainDisplay.textContent = `${profitPoints.toFixed(2)} pts`;
+            targetRatioDisplay.textContent = "1 : 2";
+            const ratios = [
+                { r: customRatio, label: `Custom (${customRatio})`, highlight: true, icon: 'fa-star' },
+                { r: 1, label: "1 : 1", highlight: false, icon: 'fa-check' },
+                { r: 2, label: "1 : 2", highlight: false, icon: 'fa-check-double' }
+            ];
+            ratios.sort((a, b) => a.r - b.r);
+            let html = '';
+            ratios.forEach((item, index) => {
+                let targetPrice = isLong ? entry + (pointsRisk * item.r) : entry - (pointsRisk * item.r);
+                const totalProfit = (pointsRisk * item.r) * lotSize;
+                const pointsCaptured = pointsRisk * item.r;
+                const rowBg = item.highlight ? "bg-gradient-to-r from-blue-600/20 to-transparent" : "hover:bg-slate-700/30";
+                const labelColor = item.highlight ? "text-blue-400 font-bold" : "text-slate-400";
+                const iconColor = item.highlight ? "text-yellow-400" : "text-slate-600";
+                
+                html += `
+                    <tr class="${rowBg} transition-colors table-row-anim" style="animation-delay: ${index * 100}ms">
+                        <td class="p-4 ${labelColor}">
+                            <i class="fa-solid ${item.icon} ${iconColor} mr-2 w-4 text-center"></i>
+                            ${item.label}
+                        </td>
+                         <td class="p-4 font-mono text-slate-300 font-bold text-sm">${pointsCaptured.toFixed(2)} pts</td>
+                        <td class="p-4 font-bold text-white tracking-wider">${targetPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td class="p-4 text-right text-emerald-400 font-medium">+${totalProfit.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    </tr>
+                `;
+            });
+            targetsBody.innerHTML = html;
+        }
+        // Default fallback values
+        const defaultData = {
+            entryPrice: "26177.15",
+            stopLoss: "26000.00"
+        };
+        
+        // Load settings from server
+        async function loadSettings() {
+            try {
+                const response = await fetch('load_settings.php');
+                if (response.ok) {
+                    const data = await response.json();
+                    entryInput.value = data.entryPrice || defaultData.entryPrice;
+                    stopInput.value = data.stopLoss || defaultData.stopLoss;
+                    calculate();
+                } else {
+                    throw new Error('Failed to load settings');
+                }
+            } catch (err) {
+                console.error('Error loading settings:', err);
+                entryInput.value = defaultData.entryPrice;
+                stopInput.value = defaultData.stopLoss;
+                calculate();
+            }
+        }
+
+        // Save settings to server
+        async function saveSettings() {
+            const data = {
+                entryPrice: entryInput.value,
+                stopLoss: stopInput.value
+            };
+            try {
+                const response = await fetch('save_settings.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    throw new Error('Failed to save settings');
+                }
+            } catch (err) {
+                console.error('Error saving settings:', err);
+            }
+        }
+
+        // Event listeners
+        [entryInput, stopInput, riskAmountInput, customRatioInput, lotSizeInput].forEach(inp => {
+            inp.addEventListener('input', calculate);
+            inp.addEventListener('change', calculate);
+        });
+
+        // Save on change for entry and stoploss
+        entryInput.addEventListener('change', saveSettings);
+        stopInput.addEventListener('change', saveSettings);
+        // --- PARTICLES ---
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let width, height;
+        let mouse = { x: null, y: null, radius: 150 };
+        
+        window.addEventListener('mousemove', (e) => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('touchmove', (e) => { mouse.x = e.touches[0].clientX; mouse.y = e.touches[0].clientY; });
+        function resizeCanvas() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+        
+        const symbols = ['₹', '$', '%', '▲', '▼'];
+        class Particle {
+            constructor() {
+                this.x = Math.random() * width; this.y = Math.random() * height;
+                this.vx = (Math.random() - 0.5) * 0.5; this.vy = (Math.random() - 0.5) * 0.5;
+                this.size = Math.random() * 2 + 0.5;
+                this.isSymbol = Math.random() > 0.8;
+                this.symbol = symbols[Math.floor(Math.random() * symbols.length)];
+                this.fontSize = Math.floor(Math.random() * 10) + 10;
+            }
+            update() {
+                this.x += this.vx;
+                if (this.isSymbol) this.y -= 0.3; else this.y += this.vy;
+                
+                if (this.x < 0 || this.x > width) this.vx *= -1;
+                if (this.y < -20) this.y = height + 20;
+                if (this.y > height + 20) this.y = -20;
+                if (mouse.x != null) {
+                    let dx = mouse.x - this.x; let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx*dx + dy*dy);
+                    if (distance < mouse.radius) {
+                        const force = (mouse.radius - distance) / mouse.radius;
+                        this.x -= (dx / distance) * force * 0.5;
+                        this.y -= (dy / distance) * force * 0.5;
+                    }
+                }
+            }
+            draw() {
+                if (this.isSymbol) {
+                    ctx.fillStyle = `rgba(148, 163, 184, 0.2)`; ctx.font = `${this.fontSize}px Inter`; ctx.fillText(this.symbol, this.x, this.y);
+                } else {
+                    ctx.fillStyle = `rgba(148, 163, 184, 0.5)`; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+        }
+        function initParticles() { particles = []; const count = Math.min(window.innerWidth / 15, 80); for (let i=0; i<count; i++) particles.push(new Particle()); }
+        function animateParticles() {
+            ctx.clearRect(0, 0, width, height); particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateParticles);
+        }
+        window.addEventListener('resize', () => { resizeCanvas(); initParticles(); });
+        resizeCanvas(); initParticles(); animateParticles();
+        // Typing Effect
+        const textToType = "Powered by Sohel Rana";
+        const typedTextElement = document.getElementById('typed-text');
+        let charIndex = 0;
+        function typeText() {
+            if (charIndex < textToType.length) {
+                typedTextElement.textContent += textToType.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeText, 100);
+            }
+        }
+        setTimeout(typeText, 1000);
+    </script>
+</body>
+</html>
