@@ -903,7 +903,7 @@
       <button class="tab-button" onclick="openTab('oldToNew')"><svg class="icon"><use href="#icon-recycle"/></svg>পুরাতন এক্সচেঞ্জ</button>
       <button class="tab-button" onclick="openTab('exchange')"><svg class="icon"><use href="#icon-exchange"/></svg>সোনা এক্সচেঞ্জ</button>
       <button class="tab-button" onclick="openTab('silverExchange')"><svg class="icon"><use href="#icon-exchange"/></svg>চাঁদি এক্সচেঞ্জ</button>
-      <button class="tab-button" onclick="openTab('loan')"><svg class="icon"><use href="#icon-loan"/></svg>স্বর্ণ বন্ধকী</button>
+      <button class="tab-button" onclick="openTab('loan')"><svg class="icon"><use href="#icon-loan"/></svg>স্বর্ণ ঋণ</button>
       <button class="tab-button" onclick="openTab('history')"><svg class="icon"><use href="#icon-history"/></svg>বিল হিস্ট্রি</button>
     </div>
     <div id="profit" class="tab-pane active">
@@ -1091,7 +1091,7 @@
     
     <div id="loan" class="tab-pane">
         <div class="card">
-            <h3><svg class="icon"><use href="#icon-loan"/></svg> স্বর্ণ বন্ধকী ক্যালকুলেটর</h3>
+            <h3><svg class="icon"><use href="#icon-loan"/></svg> স্বর্ণ ঋণ ক্যালকুলেটর</h3>
             <p style="margin-top:-10px; color: var(--text-light); font-size: 14px;">সুদের হার: মাসিক ৩%</p>
             
             <h4>গ্রাহকের তথ্য</h4>
@@ -2699,7 +2699,7 @@ function gl_generateBillHTML() {
             <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
                 <h2 style="margin: 0; font-size: 28px; color: #0284c7;">সোলেমান জুয়েলার্স</h2>
                 <p style="margin: 5px 0;">ঠিকানা: ভাদুরিয়াপাড়া বাজার | মোবাইল: 8967575884</p>
-                <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">স্বর্ণ বন্ধকী বিল</h3>
+                <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">স্বর্ণ ঋণ বিল</h3>
             </div>
             <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
                 <div><strong>গ্রাহকের নাম:</strong> ${customerName}</div>
@@ -2748,7 +2748,7 @@ function gl_previewBill() {
     }
     gl_calculateInterest(); 
 
-    document.getElementById('modalTitle').textContent = 'স্বর্ণ বন্ধকী বিল প্রিভিউ';
+    document.getElementById('modalTitle').textContent = 'স্বর্ণ ঋণ বিল প্রিভিউ';
     document.getElementById('modalBody').innerHTML = gl_generateBillHTML();
     document.getElementById('billDetailsModal').style.display = 'flex';
 }
