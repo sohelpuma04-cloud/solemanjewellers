@@ -1,4 +1,5 @@
 <!doctype html>
+<html lang="bn">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -1178,11 +1179,11 @@
             </div>
        
             <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; align-items: center;">
-            
-               <button class="btn btn-success" style="margin: 0;" onclick="gl_saveAccount()">💾 সেভ করুন</button>
-               <button id="gl_detailsBtn" class="otn_btn-details" style="display: none; margin: 0; padding: 12px 18px; border-radius: 8px; font-size: 15px;" onclick="gl_toggleDetails()">বিস্তারিত দেখুন 👁️</button>
-            
-               <button class="btn btn-alt" style="margin: 0;" onclick="gl_confirmReset()">♻ রিসেট করুন</button>
+                <button class="btn btn-success" style="margin: 0;" onclick="gl_saveAccount()">💾 সেভ করুন</button>
+                <button class="btn" style="margin: 0;" onclick="gl_saveAndPrintBill()"><svg class="icon"><use href="#icon-print"/></svg> বিল প্রিন্ট</button>
+                <button class="btn btn-alt" style="margin: 0;" onclick="gl_previewBill()">👁️ বিল প্রিভিউ</button>
+                <button id="gl_detailsBtn" class="otn_btn-details" style="display: none; margin: 0; padding: 12px 18px; border-radius: 8px; font-size: 15px;" onclick="gl_toggleDetails()">বিস্তারিত দেখুন 👁️</button>
+                <button class="btn btn-alt" style="margin: 0;" onclick="gl_confirmReset()">♻ রিসেট</button>
             </div>
             <div id="gl_savedAccountsList" class="account-list">
                </div>
@@ -1523,7 +1524,7 @@ function saveAndPrintExchangeBill() {
                 </thead>
                 <tbody>
                     <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">নতুন গহনা</td></tr>
-                    <tr><td>নতুন গহনার মূল্য</td><td style="text-align: right;">${details.newWeight.toFixed(3)} গ্রাম</td><td style="text-align: right;">${(details.newPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${details.baseNewValue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td>নতুন নাকছাবি মূল্য</td><td style="text-align: right;">${details.newWeight.toFixed(3)} গ্রাম</td><td style="text-align: right;">${(details.newPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${details.baseNewValue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     <tr><td colspan="2">মজুরি (${makingDisplay})</td><td style="text-align: right;">-</td><td style="text-align: right;">${details.labourAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     <tr><td colspan="3" style="text-align: right; font-weight:bold;">নতুন গহনার মোট:</td><td style="text-align: right; font-weight:bold;">${details.newGross.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     
@@ -1533,7 +1534,7 @@ function saveAndPrintExchangeBill() {
                     <tr><td colspan="3" style="text-align: right; font-weight:bold;">পুরাতন গহনার মোট:</td><td style="text-align: right; font-weight:bold;">${details.oldNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     
                     ${(details.includeGst && details.balance > 0) ? `
-                    <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">দিতে হবে (GST ছাড়া):</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">>Subtotal:</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     <tr><td colspan="3" style="text-align: right;">GST (${details.gstPercent}%):</td><td style="text-align: right;">${details.gstOnPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     ` : ''}
                 </tbody>
@@ -1632,7 +1633,7 @@ function saveAndPrintSilverExchangeBill() {
                     <tr><td colspan="3" style="text-align: right; font-weight:bold;">পুরাতন চাঁদির মোট:</td><td style="text-align: right; font-weight:bold;">${details.oldNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     
                     ${(details.includeGst && details.balance > 0) ? `
-                    <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">দিতে হবে (GST ছাড়া):</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">>Subtotal:</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     <tr><td colspan="3" style="text-align: right;">GST (${details.gstPercent}%):</td><td style="text-align: right;">${details.gstOnPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
                     ` : ''}
                 </tbody>
@@ -1700,7 +1701,7 @@ function previewExchange() {
     let balanceRow = '';
     if (details.balance > 0.005) {
         balanceRow = `
-            <tr><td>দিতে হবে (GST ছাড়া):</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
+            <tr><td>>Subtotal:</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
             ${details.includeGst ? `<tr><td>GST (${details.gstPercent}%):</td><td>₹${details.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
             <tr class="total-row"><td>সর্বমোট দিতে হবে:</td><td>₹${details.finalPayable.toLocaleString('en-IN')}</td></tr>
         `;
@@ -1712,7 +1713,7 @@ function previewExchange() {
     modalBody.innerHTML = `
         <table class="bill-details-table">
             <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">নতুন গহনার হিসাব</td></tr>
-            <tr><td>নতুন গহনার মূল্য:</td><td>₹${toFixedTrim(details.baseNewValue).toLocaleString('en-IN')}</td></tr>
+            <tr><td>নতুন নাকছাবি মূল্য:</td><td>₹${toFixedTrim(details.baseNewValue).toLocaleString('en-IN')}</td></tr>
             <tr><td>মজুরি:</td><td>₹${details.labourAmount.toLocaleString('en-IN')}</td></tr>
             <tr><td><strong>নতুন গহনার মোট:</strong></td><td><strong>₹${details.newGross.toLocaleString('en-IN')}</strong></td></tr>
             <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
@@ -1733,7 +1734,7 @@ function previewSilverExchange() {
     let balanceRow = '';
     if (details.balance > 0.005) {
         balanceRow = `
-            <tr><td>দিতে হবে (GST ছাড়া):</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
+            <tr><td>>Subtotal:</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
             ${details.includeGst ? `<tr><td>GST (${details.gstPercent}%):</td><td>₹${details.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
             <tr class="total-row"><td>সর্বমোট দিতে হবে:</td><td>₹${details.finalPayable.toLocaleString('en-IN')}</td></tr>
         `;
@@ -1807,7 +1808,7 @@ function saveAndPrintBill() {
                 <tr><td colspan="2">GST (${details.gstPercent}%)</td><td>₹${toFixedTrim(details.gstAmount).toLocaleString('en-IN')}</td></tr>
                 <tr class="total"><td colspan="2">সর্বমোট মূল্য</td><td>₹${toFixedTrim(total).toLocaleString('en-IN')}</td></tr>
             </table>
-            <div class="footer"><p>ধন্যবাদ! আবার আসবেন।</p></div>
+            <div class="footer"><p>ধন্যবাদ! আবার আসবেন。</p></div>
         </div></body></html>`);
     billWindow.document.close(); billWindow.focus(); billWindow.print();
 }
@@ -2264,7 +2265,7 @@ function viewBillDetails(billId) {
         let balanceRow = '';
         if (bill.balance > 0.005) {
             balanceRow = `
-                <tr><td>দিতে হবে (GST ছাড়া):</td><td>₹${bill.balance.toLocaleString('en-IN')}</td></tr>
+                <tr><td>>Subtotal:</td><td>₹${bill.balance.toLocaleString('en-IN')}</td></tr>
                 ${bill.includeGst ? `<tr><td>GST (${bill.gstPercent}%):</td><td>₹${bill.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
                 <tr class="total-row"><td>সর্বমোট দিতে হবে:</td><td>₹${bill.finalPayable.toLocaleString('en-IN')}</td></tr>
             `;
@@ -2283,7 +2284,7 @@ function viewBillDetails(billId) {
                 <tr><td>তারিখ:</td><td>${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})}</td></tr>
                 <tr><td colspan="2"><hr></td></tr>
                 <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">নতুন গহনার হিসাব</td></tr>
-                <tr><td>নতুন গহনার মূল্য:</td><td>₹${toFixedTrim(bill.baseNewValue).toLocaleString('en-IN')}</td></tr>
+                <tr><td>নতুন নাকছাবি মূল্য:</td><td>₹${toFixedTrim(bill.baseNewValue).toLocaleString('en-IN')}</td></tr>
                 <tr><td>মজুরি:</td><td>₹${bill.labourAmount.toLocaleString('en-IN')}</td></tr>
                 <tr><td><strong>নতুন গহনার মোট:</strong></td><td><strong>₹${bill.newGross.toLocaleString('en-IN')}</strong></td></tr>
                 <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
@@ -2297,7 +2298,7 @@ function viewBillDetails(billId) {
         let balanceRow = '';
         if (bill.balance > 0.005) {
             balanceRow = `
-                <tr><td>দিতে হবে (GST ছাড়া):</td><td>₹${bill.balance.toLocaleString('en-IN')}</td></tr>
+                <tr><td>>Subtotal:</td><td>₹${bill.balance.toLocaleString('en-IN')}</td></tr>
                 ${bill.includeGst ? `<tr><td>GST (${bill.gstPercent}%):</td><td>₹${bill.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
                 <tr class="total-row"><td>সর্বমোট দিতে হবে:</td><td>₹${bill.finalPayable.toLocaleString('en-IN')}</td></tr>
             `;
@@ -2670,6 +2671,110 @@ function formatDateShort(d) {
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
 }
 
+// --- GOLD LOAN BILL PRINT & PREVIEW ---
+function gl_generateBillHTML() {
+    const customerName = document.getElementById('gl_customerName').value || 'N/A';
+    const customerMobile = document.getElementById('gl_mobile').value || 'N/A';
+    const today = new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+    const invoiceId = `GL-${Date.now().toString().slice(-6)}`;
+
+    const durationText = document.getElementById('gl_durationText').innerText;
+    const finalPrincipal = document.getElementById('gl_finalPrincipal').innerText;
+    const totalInterest = document.getElementById('gl_totalInterest').innerText;
+    const grandTotal = document.getElementById('gl_grandTotal').innerText;
+
+    let transRows = '';
+    gl_transactions.forEach(t => {
+        const typeText = t.type === 'borrow' ? 'ঋণ গ্রহণ (টাকা দেওয়া হলো)' : 'পরিশোধ (টাকা নেওয়া হলো)';
+        const color = t.type === 'borrow' ? '#ef4444' : '#10b981';
+        transRows += `<tr>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${new Date(t.date).toLocaleDateString('en-GB')}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${typeText}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align:right; font-weight:bold; color:${color};">₹${t.amount.toLocaleString('en-IN')}</td>
+        </tr>`;
+    });
+
+    return `
+        <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
+            <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 28px; color: #0284c7;">সোলেমান জুয়েলার্স</h2>
+                <p style="margin: 5px 0;">ঠিকানা: ভাদুরিয়াপাড়া বাজার | মোবাইল: 8967575884</p>
+                <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">স্বর্ণ বন্ধকী বিল</h3>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>গ্রাহকের নাম:</strong> ${customerName}</div>
+                <div><strong>তারিখ:</strong> ${today}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>মোবাইল নম্বর:</strong> ${customerMobile}</div>
+                <div><strong>ইনভয়েস নং:</strong> ${invoiceId}</div>
+            </div>
+            
+            <h4 style="margin-bottom:10px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px; color: #0f172a;">লেনদেনের বিবরণ</h4>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background-color: #f1f5f9;">
+                        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">তারিখ</th>
+                        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">বিবরণ</th>
+                        <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">পরিমাণ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${transRows}
+                </tbody>
+            </table>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 10px;">
+                <tbody>
+                    <tr><td style="padding: 8px 0;"><strong>মোট সময়কাল:</strong></td><td style="text-align:right;">${durationText}</td></tr>
+                    <tr><td style="padding: 8px 0;"><strong>বর্তমান আসল:</strong></td><td style="text-align:right;">₹${finalPrincipal}</td></tr>
+                    <tr><td style="padding: 8px 0; border-bottom: 2px solid #cbd5e1;"><strong>মোট সুদ (৩% মাসিক):</strong></td><td style="text-align:right; border-bottom: 2px solid #cbd5e1;">₹${totalInterest}</td></tr>
+                    <tr><td style="padding: 12px 0; font-size: 18px;"><strong>সর্বমোট পাওনা:</strong></td><td style="text-align:right; font-size: 20px; font-weight:bold; color:var(--success-color);">₹${grandTotal}</td></tr>
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 40px; text-align: right;">
+                <p style="margin: 0;">--------------------------</p>
+                <p style="margin: 5px 0;">স্বাক্ষর</p>
+            </div>
+        </div>
+    `;
+}
+
+function gl_previewBill() {
+    if (gl_transactions.length === 0) {
+        showToast("কোনো লেনদেন নেই! আগে হিসাব করুন।");
+        return;
+    }
+    gl_calculateInterest(); 
+
+    document.getElementById('modalTitle').textContent = 'স্বর্ণ বন্ধকী বিল প্রিভিউ';
+    document.getElementById('modalBody').innerHTML = gl_generateBillHTML();
+    document.getElementById('billDetailsModal').style.display = 'flex';
+}
+
+function gl_saveAndPrintBill() {
+    if (gl_transactions.length === 0) {
+        showToast("প্রিন্ট করার আগে লেনদেন যোগ করুন!");
+        return;
+    }
+    gl_calculateInterest(); 
+    
+    const name = document.getElementById('gl_customerName').value.trim();
+    if (name) gl_saveAccount(); 
+
+    const billContent = gl_generateBillHTML();
+    const printWindow = window.open('', '', 'height=800,width=800');
+    printWindow.document.write('<html><head><title>Gold Loan Bill</title>');
+    printWindow.document.write('<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(billContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    
+    setTimeout(() => { printWindow.print(); }, 500);
+}
+
 // --- SERVER SYNC SYSTEM ---
 function loadFromServer() {
     fetch('server.php?t=' + new Date().getTime())
@@ -2761,7 +2866,6 @@ function setupWeightConversion(gramId, anaId) {
         anaInput.value = grams > 0 ? anas.toFixed(3) : '';
         updateTraditionalDisplay(anas);
         
-        // Update all displays if they're synced via updateAllAnaDisplays()
         if (typeof updateAllAnaDisplays === 'function') updateAllAnaDisplays();
 
         isCalculating = false;
@@ -2824,7 +2928,6 @@ window.onload = function() {
         }, 1000); 
     }
 
-    // নতুন দামগুলো সার্ভারে সেভ করার ফাংশন
     function saveOtherPriceToServer(key, value) {
         clearTimeout(otherPriceSaveTimeout);
         otherPriceSaveTimeout = setTimeout(() => {
@@ -2842,7 +2945,7 @@ window.onload = function() {
         }, 1000); 
     }
 
-    // --- ইভেন্ট লিসেনারস (অটো-সেভের জন্য) ---
+    // --- ইভেন্ট লিসেনারস ---
     const priceInput1 = document.getElementById('basePrice24ct');
     const priceInput2 = document.getElementById('otn_BasePrice24ct');
 
@@ -2912,7 +3015,6 @@ window.onload = function() {
     document.getElementById('gl_calcDate').valueAsDate = new Date();
     gl_loadAccountList();
     
-    // Setup for all tabs (ভরি, আনা, কুঁচ)
     setupWeightConversion('profitWeight', 'profitWeightInAna');
     setupWeightConversion('newWeight', 'newWeightInAna');
     setupWeightConversion('oldWeight', 'oldWeightInAna');
