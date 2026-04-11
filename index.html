@@ -850,48 +850,6 @@
     color: #fff;
     box-shadow: 0 4px 6px rgba(14, 165, 233, 0.3);
   }
-
-  /* --- Live Rate Popup Styles --- */
-  .live-rate-popup {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--card-background);
-    backdrop-filter: blur(12px);
-    border-left: 4px solid var(--warning-color);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    z-index: 9999;
-    width: 280px;
-    transform: translateX(150%);
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border-top: 1px solid rgba(255,255,255,0.5);
-  }
-  .live-rate-popup.show {
-    transform: translateX(0);
-  }
-  .close-popup-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #94a3b8;
-    cursor: pointer;
-    transition: color 0.3s;
-  }
-  .close-popup-btn:hover {
-    color: var(--danger-color);
-  }
-  .rate-val {
-    font-weight: 700;
-    color: var(--primary-dark);
-    font-size: 1.1em;
-    float: right;
-  }
-
   @media (max-width: 768px) {
     .inline-row {
       grid-template-columns: 1fr;
@@ -1259,19 +1217,6 @@
   </div>
   <div id="toast">Message here...</div>
 
-  <div id="liveRatePopup" class="live-rate-popup">
-    <button class="close-popup-btn" onclick="document.getElementById('liveRatePopup').classList.remove('show')">&times;</button>
-    <h4 style="margin-top:0; display:flex; align-items:center; gap:8px;">
-      <svg class="icon"><use href="#icon-jewelry"/></svg> লাইভ গোল্ড রেট (১০ গ্রাম)
-    </h4>
-    <div id="popupRateContent" style="margin-bottom: 15px; font-size: 15px; line-height: 1.8;">
-      রেট লোড হচ্ছে... ⏳
-    </div>
-    <button class="btn btn-sm btn-outline" onclick="applyPopupRate()" style="width: 100%; margin: 0;">
-      সফটওয়্যারে আপডেট করুন
-    </button>
-  </div>
-
 <script>
 // --- CONSTANTS & UTILITY FUNCTIONS ---
 const $ = (selector) => document.querySelector(selector);
@@ -1325,18 +1270,24 @@ function setExchangeMode(mode) {
     const genBtn = document.getElementById('mode-general');
     const nakBtn = document.getElementById('mode-nakmachi');
 
+    // Update visual state
     if (mode === 'general') {
         genBtn.classList.add('active');
         nakBtn.classList.remove('active');
+
+        // Revert to default/general values
         const price24ct = getVal('basePrice24ct') || 140000;
         document.getElementById('newPrice11').value = price24ct;
         document.getElementById('labourType').value = 'percent';
         document.getElementById('labourValue').value = 12;
         document.getElementById('oldPrice11').value = 141000;
         document.getElementById('deduct').value = 35;
+
     } else {
         nakBtn.classList.add('active');
         genBtn.classList.remove('active');
+
+        // Set Nakmachi specific values
         const price24ct = getVal('basePrice24ct') || 140000;
         document.getElementById('newPrice11').value = price24ct * 0.65; 
         document.getElementById('labourType').value = 'percent'; 
@@ -1344,6 +1295,8 @@ function setExchangeMode(mode) {
         document.getElementById('oldPrice11').value = 141000;
         document.getElementById('deduct').value = 65;
     }
+
+    // Recalculate
     calculateExchange(false);
     showToast(`${mode === 'general' ? 'জেনারেল' : 'নাকমাছি'} মোড চালু হয়েছে`);
 }
@@ -1374,7 +1327,7 @@ function fetchLivePrice() {
     const currentPrice24ct = getVal('basePrice24ct') || getVal('otn_BasePrice24ct');
     
     if (currentPrice24ct > 0) {
-        const currentPrice22ct = currentPrice24ct * 0.92; 
+        const currentPrice22ct = currentPrice24ct * 0.92; // 916 ratio 92%
         animateValue(livePriceDisplay24ct, currentPrice24ct - 500, currentPrice24ct, 1500);
         animateValue(livePriceDisplay22ct, currentPrice22ct - 500, currentPrice22ct, 1500);
     } else {
@@ -1504,43 +1457,239 @@ function calculateSilverExchange(returnDetails = false){
   saveSettings();
 }
 
+// --- BILL PREVIEW, SAVE, PRINT, & HISTORY ---
 function saveAndPrintExchangeBill() {
     const details = calculateExchange(true);
     if (!details || (details.newWeight <= 0 && details.oldWeight <= 0)) {
-        alert("প্রিন্ট করার আগে সঠিক হিসাব প্রয়োজন।"); return;
+        alert("প্রিন্ট করার আগে সঠিক হিসাব প্রয়োজন।");
+        return;
     }
+
     details.id = Date.now();
     details.date = new Date().toISOString();
     details.billType = 'exchange';
     details.exchangeMode = currentExchangeMode; 
+
     let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
     bills.unshift(details);
     localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
+
     alert('এক্সচেঞ্জ বিল সফলভাবে সেভ হয়েছে!');
+
+    const printWindow = window.open('', '', 'height=800,width=800');
+    const today = new Date(details.date).toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+    const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
+    
+    let title = details.exchangeMode === 'nakmachi' ? 'নাকমাছি এক্সচেঞ্জ বিল' : 'সোনা এক্সচেঞ্জ বিল';
+
+    let balanceText = '';
+    if (details.balance > 0.005) {
+        balanceText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">সর্বমোট দিতে হবে:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${details.finalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+    } else if (details.balance < -0.005) {
+        balanceText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">দোকান ফেরত দেবে:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${Math.abs(details.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+    } else {
+         balanceText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">ব্যালেন্স:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹0.00</td></tr>`;
+    }
+
+    let makingDisplay = '';
+    if (details.labourType === 'pergram') makingDisplay = `@ ₹${details.labourValue}/গ্রাম`;
+    else if (details.labourType === 'percent') makingDisplay = `${details.labourValue}%`;
+    else makingDisplay = 'ফিক্সড';
+
+    const billContent = `
+        <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
+            <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 28px; color: #0284c7;">সোলেমান জুয়েলার্স</h2>
+                <p style="margin: 5px 0;">ঠিকানা: ভাদুরিয়াপাড়া বাজার | মোবাইল: 8967575884</p>
+                <p style="margin: 5px 0; font-size: 12px;">GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
+                <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">${title}</h3>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>গ্রাহকের নাম:</strong> ${details.customerName}</div>
+                <div><strong>তারিখ:</strong> ${today}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>মোবাইল নম্বর:</strong> ${details.customerPhone}</div>
+                <div><strong>ইনভয়েস নং:</strong> ${invoiceId}</div>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #f1f5f9;">
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">বিবরণ</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">ওজন (গ্রাম)</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">হার (₹)</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">মোট (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">নতুন গহনা</td></tr>
+                    <tr><td>নতুন নাকছাবি মূল্য</td><td style="text-align: right;">${details.newWeight.toFixed(3)} গ্রাম</td><td style="text-align: right;">${(details.newPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${details.baseNewValue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="2">মজুরি (${makingDisplay})</td><td style="text-align: right;">-</td><td style="text-align: right;">${details.labourAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right; font-weight:bold;">নতুন গহনার মোট:</td><td style="text-align: right; font-weight:bold;">${details.newGross.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    
+                    <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">পুরাতন গহনা</td></tr>
+                    <tr><td>পুরাতন গহনার মূল্য</td><td style="text-align: right;">${details.oldWeight.toFixed(3)} গ্রাম</td><td style="text-align: right;">${(details.oldPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${((details.oldPrice10g / 10) * details.oldWeight).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="2">কাটছাঁট বাদ (${details.deduct}%)</td><td style="text-align: right;">-</td><td style="text-align: right;">- ${(((details.oldPrice10g / 10) * details.oldWeight) - details.oldNet).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right; font-weight:bold;">পুরাতন গহনার মোট:</td><td style="text-align: right; font-weight:bold;">${details.oldNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    
+                    ${(details.includeGst && details.balance > 0) ? `
+                    <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">>Subtotal:</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right;">GST (${details.gstPercent}%):</td><td style="text-align: right;">${details.gstOnPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    ` : ''}
+                </tbody>
+                <tfoot>
+                    <tr style="border-top: 2px solid #94a3b8;">
+                        ${balanceText}
+                    </tr>
+                </tfoot>
+            </table>
+             <div style="margin-top: 30px; text-align: right;">
+                <p style="margin: 0;">--------------------------</p>
+                <p style="margin: 5px 0;">স্বাক্ষর</p>
+            </div>
+        </div>
+    `;
+    printWindow.document.write('<html><head><title>Exchange Bill</title>');
+    printWindow.document.write('<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(billContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    setTimeout(() => { printWindow.print(); }, 500);
 }
 
+// --- NEW FUNCTION: SAVE & PRINT SILVER EXCHANGE ---
 function saveAndPrintSilverExchangeBill() {
     const details = calculateSilverExchange(true);
     if (!details || (details.newWeight <= 0 && details.oldWeight <= 0)) {
-        alert("প্রিন্ট করার আগে সঠিক হিসাব প্রয়োজন।"); return;
+        alert("প্রিন্ট করার আগে সঠিক হিসাব প্রয়োজন।");
+        return;
     }
+
     details.id = Date.now();
     details.date = new Date().toISOString();
     details.billType = 'silverExchange'; 
+
     let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
     bills.unshift(details);
     localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
+
     alert('চাঁদি এক্সচেঞ্জ বিল সফলভাবে সেভ হয়েছে!');
+
+    const printWindow = window.open('', '', 'height=800,width=800');
+    const today = new Date(details.date).toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+    const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
+    
+    let balanceText = '';
+    if (details.balance > 0.005) {
+        balanceText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">সর্বমোট দিতে হবে:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${details.finalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+    } else if (details.balance < -0.005) {
+        balanceText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">দোকান ফেরত দেবে:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${Math.abs(details.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+    } else {
+         balanceText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">ব্যালেন্স:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹0.00</td></tr>`;
+    }
+
+    let makingDisplay = '';
+    if (details.labourType === 'pergram') makingDisplay = `@ ₹${details.labourValue}/গ্রাম`;
+    else if (details.labourType === 'percent') makingDisplay = `${details.labourValue}%`;
+    else makingDisplay = 'ফিক্সড';
+
+    const billContent = `
+        <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
+            <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 28px; color: #0284c7;">সোলেমান জুয়েলার্স</h2>
+                <p style="margin: 5px 0;">ঠিকানা: ভাদুরিয়াপাড়া বাজার | মোবাইল: 8967575884</p>
+                <p style="margin: 5px 0; font-size: 12px;">GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
+                <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">চাঁদি এক্সচেঞ্জ বিল</h3>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>গ্রাহকের নাম:</strong> ${details.customerName}</div>
+                <div><strong>তারিখ:</strong> ${today}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>মোবাইল নম্বর:</strong> ${details.customerPhone}</div>
+                <div><strong>ইনভয়েস নং:</strong> ${invoiceId}</div>
+            </div>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #f1f5f9;">
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">বিবরণ</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">ওজন (গ্রাম)</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">হার (₹)</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">মোট (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">নতুন চাঁদি</td></tr>
+                    <tr><td>নতুন চাঁদির মূল্য</td><td style="text-align: right;">${details.newWeight.toFixed(3)} গ্রাম</td><td style="text-align: right;">${(details.newPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${details.baseNewValue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="2">মজুরি (${makingDisplay})</td><td style="text-align: right;">-</td><td style="text-align: right;">${details.labourAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right; font-weight:bold;">নতুন চাঁদির মোট:</td><td style="text-align: right; font-weight:bold;">${details.newGross.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    
+                    <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">পুরাতন চাঁদি</td></tr>
+                    <tr><td>পুরাতন চাঁদির মূল্য</td><td style="text-align: right;">${details.oldWeight.toFixed(3)} গ্রাম</td><td style="text-align: right;">${(details.oldPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${((details.oldPrice10g / 10) * details.oldWeight).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="2">কাটছাঁট বাদ (${details.deduct}%)</td><td style="text-align: right;">-</td><td style="text-align: right;">- ${(((details.oldPrice10g / 10) * details.oldWeight) - details.oldNet).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right; font-weight:bold;">পুরাতন চাঁদির মোট:</td><td style="text-align: right; font-weight:bold;">${details.oldNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    
+                    ${(details.includeGst && details.balance > 0) ? `
+                    <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">>Subtotal:</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right;">GST (${details.gstPercent}%):</td><td style="text-align: right;">${details.gstOnPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    ` : ''}
+                </tbody>
+                <tfoot>
+                    <tr style="border-top: 2px solid #94a3b8;">
+                        ${balanceText}
+                    </tr>
+                </tfoot>
+            </table>
+             <div style="margin-top: 30px; text-align: right;">
+                <p style="margin: 0;">--------------------------</p>
+                <p style="margin: 5px 0;">স্বাক্ষর</p>
+            </div>
+        </div>
+    `;
+    printWindow.document.write('<html><head><title>Silver Exchange Bill</title>');
+    printWindow.document.write('<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(billContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    setTimeout(() => { printWindow.print(); }, 500);
 }
+
 
 function previewBill() {
     const calcData = calculateProfit(true);
-    if (!calcData) { alert("প্রিভিউ দেখার আগে সঠিক হিসাব প্রয়োজন।"); return; }
+    if (!calcData) {
+        alert("প্রিভিউ দেখার আগে সঠিক হিসাব প্রয়োজন।");
+        return;
+    }
     const { details, total } = calcData;
     const invoiceId = `SJ-PREVIEW`;
+    
     $('#modalTitle').textContent = 'বিল প্রিভিউ';
     const modalBody = $('#modalBody');
-    modalBody.innerHTML = `<div style="text-align:center; padding: 20px;">বিল প্রিভিউ দেখা যাচ্ছে...</div>`;
+    let makingDisplay = '';
+    if (details.makingChargeType === 'pergram') makingDisplay = `@ ₹${details.makingChargeValue}/গ্রাম`;
+    else if (details.makingChargeType === 'percent') makingDisplay = `${details.makingChargeValue}% সোনার মূল্যের`;
+    else makingDisplay = 'ফিক্সড';
+    modalBody.innerHTML = `
+        <table class="bill-details-table">
+            <tr><td>ইনভয়েস নং:</td><td>${invoiceId}</td></tr>
+            <tr><td>গ্রাহকের নাম:</td><td>${details.customerName}</td></tr>
+            <tr><td>ফোন নম্বর:</td><td>${details.customerPhone}</td></tr>
+            <tr><td>তারিখ:</td><td>${new Date().toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})}</td></tr>
+            <tr><td colspan="2"><hr></td></tr>
+            <tr><td>গহনার প্রকার:</td><td>${details.qualityName}</td></tr>
+            <tr><td>ওজন:</td><td>${details.weightGrams} গ্রাম</td></tr>
+            <tr><td>সোনার মূল্য:</td><td>₹${toFixedTrim(details.totalGoldValue).toLocaleString('en-IN')}</td></tr>
+            <tr><td>মজুরি:</td><td>${makingDisplay}</td></tr>
+            <tr><td>সাবটোটাল (মজুরি সহ):</td><td>₹${toFixedTrim(details.totalGoldValue + details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
+            <tr><td>GST (${details.gstPercent}%):</td><td>₹${toFixedTrim(details.gstAmount).toLocaleString('en-IN')}</td></tr>
+            <tr class="total-row"><td>সর্বমোট মূল্য:</td><td>₹${toFixedTrim(total).toLocaleString('en-IN')}</td></tr>
+        </table>
+    `;
     $('#billDetailsModal').style.display = 'flex';
 }
 
@@ -1548,7 +1697,32 @@ function previewExchange() {
     const details = calculateExchange(true);
     if (!details) { alert("প্রিভিউ দেখার আগে সঠিক হিসাব প্রয়োজন।"); return; }
     $('#modalTitle').textContent = 'সোনা এক্সচেঞ্জ প্রিভিউ';
-    $('#modalBody').innerHTML = `<div style="text-align:center; padding: 20px;">এক্সচেঞ্জ বিল প্রিভিউ দেখা যাচ্ছে...</div>`;
+    const modalBody = $('#modalBody');
+    let balanceRow = '';
+    if (details.balance > 0.005) {
+        balanceRow = `
+            <tr><td>>Subtotal:</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
+            ${details.includeGst ? `<tr><td>GST (${details.gstPercent}%):</td><td>₹${details.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
+            <tr class="total-row"><td>সর্বমোট দিতে হবে:</td><td>₹${details.finalPayable.toLocaleString('en-IN')}</td></tr>
+        `;
+    } else if (details.balance < -0.005) {
+        balanceRow = `<tr class="total-row"><td>দোকান ফেরত দেবে:</td><td>₹${toFixedTrim(Math.abs(details.balance)).toLocaleString('en-IN')}</td></tr>`;
+    } else {
+        balanceRow = `<tr class="total-row"><td>ব্যালেন্স:</td><td>₹0</td></tr>`;
+    }
+    modalBody.innerHTML = `
+        <table class="bill-details-table">
+            <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">নতুন গহনার হিসাব</td></tr>
+            <tr><td>নতুন নাকছাবি মূল্য:</td><td>₹${toFixedTrim(details.baseNewValue).toLocaleString('en-IN')}</td></tr>
+            <tr><td>মজুরি:</td><td>₹${details.labourAmount.toLocaleString('en-IN')}</td></tr>
+            <tr><td><strong>নতুন গহনার মোট:</strong></td><td><strong>₹${details.newGross.toLocaleString('en-IN')}</strong></td></tr>
+            <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+            <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">পুরাতন গহনার হিসাব</td></tr>
+            <tr><td>পুরাতন গহনার মূল্য (${details.deduct}% কাটছাঁট পর):</td><td>₹${details.oldNet.toLocaleString('en-IN')}</td></tr>
+            <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+            ${balanceRow}
+        </table>
+    `;
     $('#billDetailsModal').style.display = 'flex';
 }
 
@@ -1556,22 +1730,87 @@ function previewSilverExchange() {
     const details = calculateSilverExchange(true);
     if (!details) { alert("প্রিভিউ দেখার আগে সঠিক হিসাব প্রয়োজন।"); return; }
     $('#modalTitle').textContent = 'চাঁদি এক্সচেঞ্জ প্রিভিউ';
-    $('#modalBody').innerHTML = `<div style="text-align:center; padding: 20px;">চাঁদি এক্সচেঞ্জ প্রিভিউ দেখা যাচ্ছে...</div>`;
+    const modalBody = $('#modalBody');
+    let balanceRow = '';
+    if (details.balance > 0.005) {
+        balanceRow = `
+            <tr><td>>Subtotal:</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
+            ${details.includeGst ? `<tr><td>GST (${details.gstPercent}%):</td><td>₹${details.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
+            <tr class="total-row"><td>সর্বমোট দিতে হবে:</td><td>₹${details.finalPayable.toLocaleString('en-IN')}</td></tr>
+        `;
+    } else if (details.balance < -0.005) {
+        balanceRow = `<tr class="total-row"><td>দোকান ফেরত দেবে:</td><td>₹${toFixedTrim(Math.abs(details.balance)).toLocaleString('en-IN')}</td></tr>`;
+    } else {
+        balanceRow = `<tr class="total-row"><td>ব্যালেন্স:</td><td>₹0</td></tr>`;
+    }
+    modalBody.innerHTML = `
+        <table class="bill-details-table">
+            <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">নতুন চাঁদির হিসাব</td></tr>
+            <tr><td>নতুন চাঁদির মূল্য:</td><td>₹${toFixedTrim(details.baseNewValue).toLocaleString('en-IN')}</td></tr>
+            <tr><td>মজুরি:</td><td>₹${details.labourAmount.toLocaleString('en-IN')}</td></tr>
+            <tr><td><strong>নতুন চাঁদির মোট:</strong></td><td><strong>₹${details.newGross.toLocaleString('en-IN')}</strong></td></tr>
+            <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+            <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">পুরাতন চাঁদির হিসাব</td></tr>
+            <tr><td>পুরাতন চাঁদির মূল্য (${details.deduct}% কাটছাঁট পর):</td><td>₹${details.oldNet.toLocaleString('en-IN')}</td></tr>
+            <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+            ${balanceRow}
+        </table>
+    `;
     $('#billDetailsModal').style.display = 'flex';
 }
 
 function saveAndPrintBill() {
     const calcData = calculateProfit(true);
     if (!calcData) { alert("প্রিন্ট করার আগে সঠিক হিসাব প্রয়োজন।"); return; }
+    
     const { details, total } = calcData;
     details.total = total;
     details.id = Date.now();
     details.date = new Date().toISOString();
     details.billType = 'profit'; 
+    
     let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
     bills.unshift(details);
     localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
+    
     alert('বিল সফলভাবে সেভ হয়েছে!');
+    const billWindow = window.open('', 'PRINT', 'height=700,width=900');
+    const today = new Date(details.date).toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+    const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
+    let makingDisplay = '';
+    if (details.makingChargeType === 'pergram') makingDisplay = `@ ₹${details.makingChargeValue}/গ্রাম`;
+    else if (details.makingChargeType === 'percent') makingDisplay = `@ ${details.makingChargeValue}% সোনার মূল্যের`;
+    else makingDisplay = `@ ফিক্সড ₹${details.makingChargeValue}`;
+    
+    billWindow.document.write(`
+        <html><head><title>Invoice ${invoiceId}</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600&display=swap');
+            body { font-family: 'Noto Sans Bengali', sans-serif; margin: 25px; } .container { border: 2px solid #000; padding: 25px; }
+            .header { text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 20px;}
+            .header h2 { margin: 0; } .header p { margin: 5px 0; font-size: 14px; } .meta { display: flex; justify-content: space-between; margin-bottom: 20px;}
+            table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+            th { background: #f2f2f2; } .total td { font-weight: bold; font-size: 1.2em; } .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ccc; font-size: 14px;}
+        </style></head><body><div class="container">
+            <div class="header">
+                <h2>সোলেমান জুয়েলার্স</h2> <p>ঠিকানা: ভাদুরিয়াপাড়া বাজার | মোবাইল: 8967575884</p> <p>GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
+            </div>
+            <div class="meta">
+                <div><strong>ইনভয়েস নং:</strong> ${invoiceId}<br><strong>তারিখ:</strong> ${today}</div>
+                <div><strong>গ্রাহকের নাম:</strong> ${details.customerName}<br><strong>ফোন:</strong> ${details.customerPhone}</div>
+            </div>
+            <h3>বিক্রয় বিল</h3>
+            <table>
+                <tr><th>বিবরণ</th><th>ওজন/পরিমাণ</th><th>মূল্য</th></tr>
+                <tr><td>গহনা (${details.qualityName})</td><td>${details.weightGrams} গ্রাম</td><td>₹${toFixedTrim(details.totalGoldValue).toLocaleString('en-IN')}</td></tr>
+                <tr><td>মজুরি</td><td>${makingDisplay}</td><td>₹${toFixedTrim(details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
+                <tr><td colspan="2">সাব-টোটাল</td><td>₹${toFixedTrim(details.totalGoldValue + details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
+                <tr><td colspan="2">GST (${details.gstPercent}%)</td><td>₹${toFixedTrim(details.gstAmount).toLocaleString('en-IN')}</td></tr>
+                <tr class="total"><td colspan="2">সর্বমোট মূল্য</td><td>₹${toFixedTrim(total).toLocaleString('en-IN')}</td></tr>
+            </table>
+            <div class="footer"><p>ধন্যবাদ! আবার আসবেন。</p></div>
+        </div></body></html>`);
+    billWindow.document.close(); billWindow.focus(); billWindow.print();
 }
 
 function otn_calculateOldToNew() {
@@ -1585,15 +1824,41 @@ function otn_calculateOldToNew() {
     const makingValue = getVal('otn_makingChargeValue');
     const gstPercent = getVal('otn_GstPercent');
     otn_calculationResult = {
-        oldWeight, oldType: $('#otn_OldType').options[$('#otn_OldType').selectedIndex].text,
-        newWeight, newType: $('#otn_NewType').options[$('#otn_NewType').selectedIndex].text,
-        price24ct, makingType, makingValue, gstPercent, pureGoldEq: 0
+        oldWeight,
+        oldType: $('#otn_OldType').options[$('#otn_OldType').selectedIndex].text,
+        newWeight,
+        newType: $('#otn_NewType').options[$('#otn_NewType').selectedIndex].text,
+        price24ct,
+        makingType,
+        makingValue,
+        gstPercent,
+        pureGoldEq: 0
     };
     if (oldWeight <= 0 || newWeight <= 0 || price24ct <= 0) {
-        $('#otn_oldToNewOutput').innerHTML = 'অনুগ্রহ করে সমস্ত সঠিক তথ্য লিখুন।'; return;
+        $('#otn_oldToNewOutput').innerHTML = 'অনুগ্রহ করে সমস্ত সঠিক তথ্য লিখুন।';
+        return;
     }
-    const oldPurityFactors = { Licence: 85/92, bengali: 65/92, kdm_850: 78/92, desi_bengali: 58/92 };
-    let pureGoldEq = oldWeight * (oldPurityFactors[oldType] || 65/92);
+    let pureGoldEq;
+    
+    if (oldType === 'Licence' && newType === 'kdm_850') { pureGoldEq = oldWeight * 85 / 85; }
+    else if (oldType === 'Licence' && newType === 'bengali') { pureGoldEq = oldWeight * 85 / 75; }
+    else if (oldType === 'Licence' && newType === 'desi_bengali') { pureGoldEq = oldWeight * 85 / 65; }
+    else if (oldType === 'kdm_850' && newType === 'Licence') { pureGoldEq = oldWeight * 78 / 92; }
+    else if (oldType === 'kdm_850' && newType === 'kdm_850') { pureGoldEq = oldWeight * 78 / 85; }
+    else if (oldType === 'kdm_850' && newType === 'bengali') { pureGoldEq = oldWeight * 78 / 75; }
+    else if (oldType === 'kdm_850' && newType === 'desi_bengali') { pureGoldEq = oldWeight * 78 / 65; }
+    else if (oldType === 'bengali' && newType === 'kdm_850') { pureGoldEq = oldWeight * 65 / 85; }
+    else if (oldType === 'bengali' && newType === 'desi_bengali') { pureGoldEq = oldWeight * 65 / 58; }
+    else if (oldType === 'bengali' && newType === 'bengali') { pureGoldEq = oldWeight * 65 / 75; }
+    else if (oldType === 'desi_bengali' && newType === 'Licence') { pureGoldEq = oldWeight * 58 / 92; }
+    else if (oldType === 'desi_bengali' && newType === 'kdm_850') { pureGoldEq = oldWeight * 58 / 85; }
+    else if (oldType === 'desi_bengali' && newType === 'bengali') { pureGoldEq = oldWeight * 58 / 75; }
+    else if (oldType === 'desi_bengali' && newType === 'desi_bengali') { pureGoldEq = oldWeight * 58 / 65; }
+    else {
+        const oldPurityFactors = { Licence: 85/92, bengali: 65/92, kdm_850: 78/92, desi_bengali: 58/92 };
+        pureGoldEq = oldWeight * (oldPurityFactors[oldType] || 65/92);
+    }
+    
     otn_calculationResult.pureGoldEq = pureGoldEq;
     const deductionInGrams = oldWeight - pureGoldEq;
     
@@ -1606,41 +1871,230 @@ function otn_calculateOldToNew() {
     else if (makingType === 'percent') totalMakingCharge = (makingValue / 100) * newGoldValue;
     else if (makingType === 'pergram') totalMakingCharge = makingValue * newWeight;
     otn_calculationResult.totalMakingCharge = totalMakingCharge;
-    
-    let summaryHTML = `<strong style="font-size: 1.2em;">হিসাব সম্পন্ন হয়েছে। সম্পূর্ণ হিসাব দেখুন।</strong>`;
-    $('#otn_oldToNewOutput').innerHTML = `<div style="margin-bottom: 8px;">${summaryHTML}</div>`;
+    let detailsHTML, summaryHTML;
+    if (deficitWeight < -0.001) { 
+        const excessGoldInGrams = Math.abs(deficitWeight);
+        const creditValue = excessGoldInGrams * pricePerGramNew;
+        let finalPayable = 0, finalRefundable = 0;
+        if (totalMakingCharge > creditValue) {
+            let payableMakingCharge = totalMakingCharge - creditValue;
+            let gstOnPayable = payableMakingCharge * (gstPercent / 100);
+            finalPayable = payableMakingCharge + gstOnPayable;
+        } else {
+            finalRefundable = creditValue - totalMakingCharge;
+        }
+        detailsHTML = `
+            <strong>প্রাপ্ত পাকা সোনার ওজন:</strong> ${pureGoldEq.toFixed(3)} গ্রাম / ${gramsToAnaString(pureGoldEq)}<hr>
+            <strong>বাদ গেছে:</strong> ${deductionInGrams.toFixed(3)} গ্রাম / ${gramsToAnaString(deductionInGrams)}<hr>
+            <strong>অতিরিক্ত সোনা রয়েছে:</strong> ${excessGoldInGrams.toFixed(3)} গ্রাম / ${gramsToAnaString(excessGoldInGrams)}<hr>
+            <strong>নতুন গহনার মোট মজুরি:</strong> ₹${totalMakingCharge.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
+            <strong>অতিরিক্ত সোনার জন্য ক্রেডিট:</strong> ₹${creditValue.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+        `;
+        summaryHTML = finalPayable > 0.01
+            ? `<strong style="font-size: 1.2em;">সর্বমোট প্রদেয় মূল্য: <span style="color: var(--primary-dark);">₹${finalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></strong>`
+            : `<strong style="font-size: 1.2em;">দোকান ফেরত দেবে: <span style="color: var(--danger-dark);">₹${finalRefundable.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></strong>`;
+        Object.assign(otn_calculationResult, { finalPayable, finalRefundable, creditValue, totalMakingCharge, excessGoldInGrams, deductionInGrams });
+    }
+    else { 
+        const costOfDeficitGold = deficitWeight * pricePerGramNew;
+        const subtotal = costOfDeficitGold + totalMakingCharge;
+        const gstAmount = subtotal * (gstPercent / 100);
+        const totalPayable = subtotal + gstAmount;
+        let pricePerAnaText = '';
+        if (deficitWeight > 0.001) {
+            let makingChargeForDeficit;
+            if (makingType === 'percent') {
+                makingChargeForDeficit = (makingValue / 100) * costOfDeficitGold;
+            } else if (makingType === 'pergram') {
+                makingChargeForDeficit = deficitWeight * makingValue;
+            } else { 
+                makingChargeForDeficit = makingValue * (deficitWeight / newWeight);
+            }
+            const subtotalForDeficit = costOfDeficitGold + makingChargeForDeficit;
+            const gstForDeficit = subtotalForDeficit * (gstPercent / 100);
+            const totalCostForDeficit = subtotalForDeficit + gstForDeficit;
+            const deficitInAna = deficitWeight * GRAMS_TO_ANA_RATE;
+            if (deficitInAna > 0) {
+                const pricePerAna = totalCostForDeficit / deficitInAna;
+                pricePerAnaText = ` <span style="font-size: 0.9em; color: var(--text-light);">(মজুরি ও GST সহ প্রতি আনা প্রায় ₹${pricePerAna.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})})</span>`;
+            }
+        }
+        detailsHTML = `
+            <strong>প্রাপ্ত পাকা সোনার ওজন:</strong> ${pureGoldEq.toFixed(3)} গ্রাম / ${gramsToAnaString(pureGoldEq)}<hr>
+            <strong>বাদ গেছে:</strong> ${deductionInGrams.toFixed(3)} গ্রাম / ${gramsToAnaString(deductionInGrams)}<hr>
+            <strong>অতিরিক্ত সোনা কিনতে হবে:</strong> ${deficitWeight.toFixed(3)} গ্রাম / ${gramsToAnaString(deficitWeight)}<hr>
+            <strong>অতিরিক্ত সোনার মূল্য:</strong> ₹${costOfDeficitGold.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}${pricePerAnaText}<br>
+            <strong>নতুন গহনার (${newWeight} গ্রাম) মজুরি:</strong> ₹${totalMakingCharge.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
+            <strong>সাবটোটাল (মূল্য + মজুরি):</strong> ₹${subtotal.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}<br>
+            <strong>GST (${gstPercent}%):</strong> ₹${gstAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+        `;
+        summaryHTML = `<strong style="font-size: 1.2em;">সর্বমোট প্রদেয় মূল্য: <span style="color: var(--primary-dark);">₹${totalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></strong>`;
+        Object.assign(otn_calculationResult, { totalPayable, costOfDeficitGold, totalMakingCharge, subtotal, gstAmount, deficitWeight, deductionInGrams });
+    }
+    otn_calculationResult.detailsHTML = detailsHTML;
+    $('#otn_oldToNewOutput').innerHTML = `
+        <div style="margin-bottom: 8px;">${summaryHTML}</div>
+        <button class="otn_btn-details" onclick="otn_toggleDetails(this)">সম্পূর্ণ হিসাব দেখুন</button>
+        <div id="otn_calculation-details" style="display: none;">${detailsHTML}</div>
+    `;
 }
 
 function otn_toggleDetails(button) {
     const details = $('#otn_calculation-details');
     if (details.style.display === 'none') {
-        details.style.display = 'block'; button.textContent = 'সম্পূর্ণ হিসাব';
+        details.style.display = 'block';
+        button.textContent = 'সম্পূর্ণ হিসাব';
     } else {
-        details.style.display = 'none'; button.textContent = 'সম্পূর্ণ হিসাব দেখুন';
+        details.style.display = 'none';
+        button.textContent = 'সম্পূর্ণ হিসাব দেখুন';
     }
 }
 
 function otn_resetOldToNew() {
-    $('#otn_customerName').value = ''; $('#otn_customerMobile').value = '';
-    $('#otn_OldWeight').value = '10'; $('#otn_NewWeight').value = '10';
+    $('#otn_customerName').value = '';
+    $('#otn_customerMobile').value = '';
+    $('#otn_OldWeight').value = '10';
+    $('#otn_OldWeightInAna').value = (10 * GRAMS_TO_ANA_RATE).toFixed(3);
+    $('#otn_OldType').value = 'desi_bengali';
+    $('#otn_NewWeight').value = '10';
+    $('#otn_NewWeightInAna').value = (10 * GRAMS_TO_ANA_RATE).toFixed(3);
+    $('#otn_NewType').value = 'Licence';
     $('#otn_BasePrice24ct').value = '140000';
+    $('#otn_makingChargeType').value = 'percent';
+    $('#otn_makingChargeValue').value = '9.99';
+    $('#otn_GstPercent').value = '3';
     otn_calculateOldToNew();
+}
+
+function otn_generateBillHTML() {
+    const customerName = $('#otn_customerName').value || 'N/A';
+    const customerMobile = $('#otn_customerMobile').value || 'N/A';
+    const now = new Date();
+    const dateStr = now.toLocaleDateString('bn-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+    const timeStr = now.toLocaleTimeString('bn-IN', { hour: '2-digit', minute: '2-digit' });
+    let finalAmountText = '';
+    if (otn_calculationResult.hasOwnProperty('totalPayable')) {
+        finalAmountText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">সর্বমোট প্রদেয় মূল্য:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${otn_calculationResult.totalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+    } else if (otn_calculationResult.hasOwnProperty('finalPayable') && otn_calculationResult.finalPayable > 0.01) {
+        finalAmountText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">সর্বমোট প্রদেয় মূল্য:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${otn_calculationResult.finalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+    } else {
+         finalAmountText = `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">দোকান ফেরত দেবে:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${(otn_calculationResult.finalRefundable || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td></tr>`;
+    }
+    let makingDisplay = '';
+    if (otn_calculationResult.makingType === 'pergram') makingDisplay = `${otn_calculationResult.makingValue}/গ্রাম`;
+    else if (otn_calculationResult.makingType === 'percent') makingDisplay = `${otn_calculationResult.makingValue}%`;
+    else makingDisplay = 'ফিক্সড';
+    return `
+        <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
+            <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 28px; color: #0284c7;">সোলেমান জুয়েলার্স</h2>
+                <p style="margin: 5px 0;">ঠিকানা: ভাদুরিয়াপাড়া বাজার | মোবাইল: 8967575884</p>
+                <p style="margin: 5px 0; font-size: 12px;">GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
+                <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">গহনা বিনিময়ের বিল</h3>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>গ্রাহকের নাম:</strong> ${customerName}</div>
+                <div><strong>তারিখ:</strong> ${dateStr}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>মোবাইল নম্বর:</strong> ${customerMobile}</div>
+                <div><strong>সময়:</strong> ${timeStr}</div>
+            </div>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #f1f5f9;">
+                    <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">বিবরণ</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">ওজন (গ্রাম)</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">হার (₹)</th>
+                    <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">মোট (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">পুরাতন গহনা</td></tr>
+                    <tr><td>${otn_calculationResult.oldType}</td><td style="text-align: right;">${otn_calculationResult.oldWeight.toFixed(3)} গ্রাম</td><td>-</td><td>-</td></tr>
+                    <tr><td colspan="3" style="text-align: right;">বাদ গেছে:</td><td style="text-align: right;">${(otn_calculationResult.deductionInGrams || 0).toFixed(3)} গ্রাম</td></tr>
+                    <tr><td colspan="3" style="text-align: right; font-weight:bold;">প্রাপ্ত পাকা সোনার ওজন:</td><td style="text-align: right; font-weight:bold;">${(otn_calculationResult.pureGoldEq || 0).toFixed(3)} গ্রাম</td></tr>
+                    
+                    <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">নতুন গহনা</td></tr>
+                    <tr><td>${otn_calculationResult.newType}</td><td style="text-align: right;">${otn_calculationResult.newWeight.toFixed(3)} গ্রাম</td><td>-</td><td>-</td></tr>
+                    
+                    ${otn_calculationResult.deficitWeight > 0.001 ? `
+                    <tr><td colspan="2">অতিরিক্ত সোনা কিনতে হবে (${otn_calculationResult.deficitWeight.toFixed(3)} গ্রাম)</td><td style="text-align: right;">-</td><td style="text-align: right;">${(otn_calculationResult.costOfDeficitGold || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="2">নতুন গহনার মজুরি (${otn_calculationResult.newWeight.toFixed(3)} গ্রাম)</td><td style="text-align: right;">${makingDisplay}</td><td style="text-align: right;">${(otn_calculationResult.totalMakingCharge || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right;">সাবটোটাল:</td><td style="text-align: right;">${(otn_calculationResult.subtotal || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right;">GST (${otn_calculationResult.gstPercent}%):</td><td style="text-align: right;">${(otn_calculationResult.gstAmount || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    ` : `
+                    <tr><td colspan="2">নতুন গহনার মজুরি (${otn_calculationResult.newWeight.toFixed(3)} গ্রাম)</td><td style="text-align: right;">${makingDisplay}</td><td style="text-align: right;">${(otn_calculationResult.totalMakingCharge || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    <tr><td colspan="3" style="text-align: right;">অতিরিক্ত সোনার জন্য ক্রেডিট:</td><td style="text-align: right;">- ₹${(otn_calculationResult.creditValue || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                    `}
+                </tbody>
+                <tfoot>
+                    <tr style="border-top: 2px solid #94a3b8;">
+                        ${finalAmountText}
+                    </tr>
+                </tfoot>
+            </table>
+             <div style="margin-top: 30px; text-align: right;">
+                <p style="margin: 0;">--------------------------</p>
+                <p style="margin: 5px 0;">স্বাক্ষর</p>
+            </div>
+        </div>
+    `;
 }
 
 function otn_saveAndPrintBill() {
     otn_calculateOldToNew();
     if (!otn_calculationResult.pureGoldEq || otn_calculationResult.pureGoldEq <= 0) {
-        alert("প্রিন্ট করার আগে অনুগ্রহ করে সঠিক তথ্য পূরণ করুন।"); return;
+        alert("প্রিন্ট করার আগে অনুগ্রহ করে সঠিক তথ্য পূরণ করুন।");
+        return;
     }
+    
+    const customerName = $('#otn_customerName').value || 'N/A';
+    const customerMobile = $('#otn_customerMobile').value || 'N/A';
+    
+    const bill = {
+        id: Date.now(),
+        billType: 'oldToNew',
+        date: new Date().toISOString(),
+        customerName: customerName,
+        customerMobile: customerMobile,
+        oldWeight: otn_calculationResult.oldWeight,
+        oldType: otn_calculationResult.oldType,
+        newWeight: otn_calculationResult.newWeight,
+        newType: otn_calculationResult.newType,
+        price24ct: otn_calculationResult.price24ct,
+        makingType: otn_calculationResult.makingType,
+        makingValue: otn_calculationResult.makingValue,
+        gstPercent: otn_calculationResult.gstPercent,
+        calculationResult: otn_calculationResult,
+        finalAmount: otn_calculationResult.totalPayable || otn_calculationResult.finalPayable || 0
+    };
+    
+    let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
+    bills.unshift(bill);
+    localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
+    
     alert('পুরাতন এক্সচেঞ্জ বিল সফলভাবে সেভ হয়েছে!');
+    
+    const billContent = otn_generateBillHTML();
+    const printWindow = window.open('', '', 'height=800,width=800');
+    printWindow.document.write('<html><head><title>Bill</title>');
+    printWindow.document.write('<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(billContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    setTimeout(() => { printWindow.print(); }, 500);
 }
 
 function otn_previewBill() {
     otn_calculateOldToNew();
     if (!otn_calculationResult.pureGoldEq || otn_calculationResult.pureGoldEq <= 0) {
-        alert("অনুগ্রহ করে সঠিক তথ্য পূরণ করুন।"); return;
+        alert("অনুগ্রহ করে সঠিক তথ্য পূরণ করুন।");
+        return;
     }
-    $('#otn_bill-preview-content').innerHTML = "প্রিভিউ দেখা যাচ্ছে...";
+    const billContent = otn_generateBillHTML();
+    $('#otn_bill-preview-content').innerHTML = billContent;
     $('#otn_bill-preview-modal').style.display = 'flex';
 }
 
@@ -1648,39 +2102,288 @@ function otn_closeModal() {
     $('#otn_bill-preview-modal').style.display = 'none';
 }
 
+// --- BILL HISTORY MANAGEMENT ---
 function displayBillHistory() {
-    $('#billHistoryContainer').innerHTML = '<p style="text-align: center; color: var(--text-light);">এখানে আপনার সব বিল দেখা যাবে।</p>';
+    const container = $('#billHistoryContainer');
+    const bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
+    if (bills.length === 0) {
+        container.innerHTML = '<p style="text-align: center; color: var(--text-light);">এখানে কোনো সেভ করা বিল নেই।</p>';
+        return;
+    }
+    container.innerHTML = bills.map(bill => {
+        if (bill.billType === 'profit') {
+            return `
+                <div class="bill-item" id="bill-item-${bill.id}">
+                    <div class="bill-item-info">
+                        <strong>📦 কেনাবেচা - গ্রাহক: ${bill.customerName}</strong>
+                        <span>তারিখ: ${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})} | মোট: ₹${toFixedTrim(bill.total).toLocaleString('en-IN')}</span>
+                    </div>
+                    <div class="bill-item-actions">
+                        <button class="btn btn-sm btn-alt" onclick="viewBillDetails(${bill.id})">বিস্তারিত দেখুন</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteBill(${bill.id})">ডিলিট</button>
+                    </div>
+                </div>
+            `;
+        } else if (bill.billType === 'oldToNew') {
+            const totalAmount = bill.calculationResult.totalPayable || bill.calculationResult.finalPayable || bill.calculationResult.finalRefundable || 0;
+            const amountText = bill.calculationResult.finalRefundable ? `ফেরত: ₹${toFixedTrim(bill.calculationResult.finalRefundable).toLocaleString('en-IN')}` : `মোট: ₹${toFixedTrim(totalAmount).toLocaleString('en-IN')}`;
+            return `
+                <div class="bill-item" id="bill-item-${bill.id}">
+                    <div class="bill-item-info">
+                        <strong>🔄 পুরাতন এক্সচেঞ্জ - গ্রাহক: ${bill.customerName}</strong>
+                        <span>তারিখ: ${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})} | ${amountText}</span>
+                    </div>
+                    <div class="bill-item-actions">
+                        <button class="btn btn-sm btn-alt" onclick="viewBillDetails(${bill.id})">বিস্তারিত দেখুন</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteBill(${bill.id})">ডিলিট</button>
+                    </div>
+                </div>
+            `;
+        } else if (bill.billType === 'exchange') {
+            const amountText = bill.balance > 0 ? `দিতে হবে: ₹${toFixedTrim(bill.finalPayable).toLocaleString('en-IN')}` : `ফেরত: ₹${toFixedTrim(Math.abs(bill.balance)).toLocaleString('en-IN')}`;
+            const exType = bill.exchangeMode === 'nakmachi' ? 'নাকমাছি এক্সচেঞ্জ' : 'সোনা এক্সচেঞ্জ';
+            return `
+                <div class="bill-item" id="bill-item-${bill.id}">
+                    <div class="bill-item-info">
+                        <strong>🔄 ${exType} - গ্রাহক: ${bill.customerName}</strong>
+                        <span>তারিখ: ${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})} | ${amountText}</span>
+                    </div>
+                    <div class="bill-item-actions">
+                        <button class="btn btn-sm btn-alt" onclick="viewBillDetails(${bill.id})">বিস্তারিত দেখুন</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteBill(${bill.id})">ডিলিট</button>
+                    </div>
+                </div>
+            `;
+        } else if (bill.billType === 'silverExchange') {
+            const amountText = bill.balance > 0 ? `দিতে হবে: ₹${toFixedTrim(bill.finalPayable).toLocaleString('en-IN')}` : `ফেরত: ₹${toFixedTrim(Math.abs(bill.balance)).toLocaleString('en-IN')}`;
+            return `
+                <div class="bill-item" id="bill-item-${bill.id}">
+                    <div class="bill-item-info">
+                        <strong>🔄 চাঁদি এক্সচেঞ্জ - গ্রাহক: ${bill.customerName || 'N/A'}</strong>
+                        <span>তারিখ: ${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})} | ${amountText}</span>
+                    </div>
+                    <div class="bill-item-actions">
+                        <button class="btn btn-sm btn-alt" onclick="viewBillDetails(${bill.id})">বিস্তারিত দেখুন</button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteBill(${bill.id})">ডিলিট</button>
+                    </div>
+                </div>
+            `;
+        }
+        return '';
+    }).join('');
 }
 
 function deleteBill(billId) {
-    if (!confirm('আপনি কি সত্যিই এই বিলটি ডিলিট করতে চান? এই কাজটি ফেরানো যাবে না।')) return;
+    if (!confirm('আপনি কি সত্যিই এই বিলটি ডিলিট করতে চান? এই কাজটি ফেরানো যাবে না।')) {
+        return;
+    }
+    let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
+    const updatedBills = bills.filter(bill => bill.id !== billId);
+    localStorage.setItem('solemanJewellersBills', JSON.stringify(updatedBills));
     displayBillHistory();
 }
 
 function viewBillDetails(billId) {
+    const bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
+    const bill = bills.find(b => b.id === billId);
+    if (!bill) {
+        alert('বিল খুঁজে পাওয়া যায়নি!');
+        return;
+    }
     $('#modalTitle').textContent = 'সেভ করা বিলের বিবরণ';
-    $('#modalBody').innerHTML = "বিস্তারিত বিবরণ এখানে...";
+    const modalBody = $('#modalBody');
+    const invoiceId = `SJ-${bill.id.toString().slice(-6)}`;
+    
+    if (bill.billType === 'profit') {
+        let makingDisplay = '';
+        if (bill.makingChargeType === 'pergram') makingDisplay = `@ ₹${bill.makingChargeValue}/গ্রাম`;
+        else if (bill.makingChargeType === 'percent') makingDisplay = `${bill.makingChargeValue}% সোনার মূল্যের`;
+        else makingDisplay = 'ফিক্সড';
+        modalBody.innerHTML = `
+            <table class="bill-details-table">
+                <tr><td>ইনভয়েস নং:</td><td>${invoiceId}</td></tr>
+                <tr><td>বিলের ধরন:</td><td>কেনাবেচা</td></tr>
+                <tr><td>গ্রাহকের নাম:</td><td>${bill.customerName}</td></tr>
+                <tr><td>ফোন নম্বর:</td><td>${bill.customerPhone}</td></tr>
+                <tr><td>তারিখ:</td><td>${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})}</td></tr>
+                <tr><td colspan="2"><hr></td></tr>
+                <tr><td>গহনার প্রকার:</td><td>${bill.qualityName}</td></tr>
+                <tr><td>ওজন:</td><td>${bill.weightGrams} গ্রাম</td></tr>
+                <tr><td>সোনার মূল্য:</td><td>₹${toFixedTrim(bill.totalGoldValue).toLocaleString('en-IN')}</td></tr>
+                <tr><td>মজুরি:</td><td>${makingDisplay}</td></tr>
+                <tr><td>সাবটোটাল (মজুরি সহ):</td><td>₹${toFixedTrim(bill.totalGoldValue + bill.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
+                <tr><td>GST (${bill.gstPercent}%):</td><td>₹${toFixedTrim(bill.gstAmount).toLocaleString('en-IN')}</td></tr>
+                <tr class="total-row"><td>সর্বমোট মূল্য:</td><td>₹${toFixedTrim(bill.total).toLocaleString('en-IN')}</td></tr>
+            </table>
+        `;
+    } else if (bill.billType === 'oldToNew') {
+        const calc = bill.calculationResult;
+        let makingDisplay = '';
+        if (bill.makingType === 'pergram') makingDisplay = `${bill.makingValue}/গ্রাম`;
+        else if (bill.makingType === 'percent') makingDisplay = `${bill.makingValue}%`;
+        else makingDisplay = 'ফিক্সড';
+        let summary = '';
+        if (calc.totalPayable) {
+            summary = `<tr class="total-row"><td>সর্বমোট প্রদেয় মূল্য:</td><td>₹${toFixedTrim(calc.totalPayable).toLocaleString('en-IN')}</td></tr>`;
+        } else if (calc.finalPayable > 0.01) {
+            summary = `<tr class="total-row"><td>সর্বমোট প্রদেয় মূল্য:</td><td>₹${toFixedTrim(calc.finalPayable).toLocaleString('en-IN')}</td></tr>`;
+        } else {
+            summary = `<tr class="total-row"><td>দোকান ফেরত দেবে:</td><td>₹${toFixedTrim(calc.finalRefundable || 0).toLocaleString('en-IN')}</td></tr>`;
+        }
+        modalBody.innerHTML = `
+            <table class="bill-details-table">
+                <tr><td>ইনভয়েস নং:</td><td>${invoiceId}</td></tr>
+                <tr><td>বিলের ধরন:</td><td>পুরাতন এক্সচেঞ্জ</td></tr>
+                <tr><td>গ্রাহকের নাম:</td><td>${bill.customerName}</td></tr>
+                <tr><td>মোবাইল নম্বর:</td><td>${bill.customerMobile}</td></tr>
+                <tr><td>তারিখ:</td><td>${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})}</td></tr>
+                <tr><td colspan="2"><hr></td></tr>
+                <tr><td>পুরাতন গহনার প্রকার:</td><td>${bill.oldType}</td></tr>
+                <tr><td>পুরাতন গহনার ওজন:</td><td>${bill.oldWeight} গ্রাম</td></tr>
+                <tr><td>নতুন গহনার প্রকার:</td><td>${bill.newType}</td></tr>
+                <tr><td>নতুন গহনার ওজন:</td><td>${bill.newWeight} গ্রাম</td></tr>
+                <tr><td>২৪ ক্যারেট সোনার দাম:</td><td>₹${bill.price24ct}</td></tr>
+                <tr><td>মজুরির ধরন:</td><td>${bill.makingType} (${makingDisplay})</td></tr>
+                <tr><td>GST:</td><td>${bill.gstPercent}%</td></tr>
+                <tr><td colspan="2"><hr></td></tr>
+                <tr><td>প্রাপ্ত পাকা সোনার ওজন:</td><td>${calc.pureGoldEq.toFixed(3)} গ্রাম</td></tr>
+                <tr><td>বাদ গেছে:</td><td>${(calc.deductionInGrams || 0).toFixed(3)} গ্রাম</td></tr>
+                ${calc.deficitWeight > 0.001 ?  
+                    `<tr><td>অতিরিক্ত সোনা কিনতে হবে:</td><td>${calc.deficitWeight.toFixed(3)} গ্রাম</td></tr>
+                     <tr><td>অতিরিক্ত সোনার মূল্য:</td><td>₹${toFixedTrim(calc.costOfDeficitGold || 0).toLocaleString('en-IN')}</td></tr>
+                     <tr><td>মজুরি:</td><td>₹${toFixedTrim(calc.totalMakingCharge || 0).toLocaleString('en-IN')}</td></tr>
+                     <tr><td>সাবটোটাল:</td><td>₹${toFixedTrim(calc.subtotal || 0).toLocaleString('en-IN')}</td></tr>
+                     <tr><td>GST (${bill.gstPercent}%):</td><td>₹${toFixedTrim(calc.gstAmount || 0).toLocaleString('en-IN')}</td></tr>` 
+                    : 
+                    `<tr><td>অতিরিক্ত সোনার জন্য ক্রেডিট:</td><td>₹${toFixedTrim(calc.creditValue || 0).toLocaleString('en-IN')}</td></tr>
+                     <tr><td>মজুরি:</td><td>₹${toFixedTrim(calc.totalMakingCharge || 0).toLocaleString('en-IN')}</td></tr>`
+                }
+                ${summary}
+            </table>
+        `;
+    } else if (bill.billType === 'exchange') {
+        let balanceRow = '';
+        if (bill.balance > 0.005) {
+            balanceRow = `
+                <tr><td>>Subtotal:</td><td>₹${bill.balance.toLocaleString('en-IN')}</td></tr>
+                ${bill.includeGst ? `<tr><td>GST (${bill.gstPercent}%):</td><td>₹${bill.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
+                <tr class="total-row"><td>সর্বমোট দিতে হবে:</td><td>₹${bill.finalPayable.toLocaleString('en-IN')}</td></tr>
+            `;
+        } else if (bill.balance < -0.005) {
+            balanceRow = `<tr class="total-row"><td>দোকান ফেরত দেবে:</td><td>₹${toFixedTrim(Math.abs(bill.balance)).toLocaleString('en-IN')}</td></tr>`;
+        } else {
+            balanceRow = `<tr class="total-row"><td>ব্যালেন্স:</td><td>₹0</td></tr>`;
+        }
+        
+        modalBody.innerHTML = `
+            <table class="bill-details-table">
+                <tr><td>ইনভয়েস নং:</td><td>${invoiceId}</td></tr>
+                <tr><td>বিলের ধরন:</td><td>${bill.exchangeMode === 'nakmachi' ? 'নাকমাছি এক্সচেঞ্জ' : 'সোনা এক্সচেঞ্জ'}</td></tr>
+                <tr><td>গ্রাহকের নাম:</td><td>${bill.customerName}</td></tr>
+                <tr><td>মোবাইল নম্বর:</td><td>${bill.customerPhone}</td></tr>
+                <tr><td>তারিখ:</td><td>${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})}</td></tr>
+                <tr><td colspan="2"><hr></td></tr>
+                <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">নতুন গহনার হিসাব</td></tr>
+                <tr><td>নতুন নাকছাবি মূল্য:</td><td>₹${toFixedTrim(bill.baseNewValue).toLocaleString('en-IN')}</td></tr>
+                <tr><td>মজুরি:</td><td>₹${bill.labourAmount.toLocaleString('en-IN')}</td></tr>
+                <tr><td><strong>নতুন গহনার মোট:</strong></td><td><strong>₹${bill.newGross.toLocaleString('en-IN')}</strong></td></tr>
+                <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+                <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">পুরাতন গহনার হিসাব</td></tr>
+                <tr><td>পুরাতন গহনার মূল্য (${bill.deduct}% কাটছাঁট পর):</td><td>₹${bill.oldNet.toLocaleString('en-IN')}</td></tr>
+                <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+                ${balanceRow}
+            </table>
+        `;
+    } else if (bill.billType === 'silverExchange') {
+        let balanceRow = '';
+        if (bill.balance > 0.005) {
+            balanceRow = `
+                <tr><td>>Subtotal:</td><td>₹${bill.balance.toLocaleString('en-IN')}</td></tr>
+                ${bill.includeGst ? `<tr><td>GST (${bill.gstPercent}%):</td><td>₹${bill.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
+                <tr class="total-row"><td>সর্বমোট দিতে হবে:</td><td>₹${bill.finalPayable.toLocaleString('en-IN')}</td></tr>
+            `;
+        } else if (bill.balance < -0.005) {
+            balanceRow = `<tr class="total-row"><td>দোকান ফেরত দেবে:</td><td>₹${toFixedTrim(Math.abs(bill.balance)).toLocaleString('en-IN')}</td></tr>`;
+        } else {
+            balanceRow = `<tr class="total-row"><td>ব্যালেন্স:</td><td>₹0</td></tr>`;
+        }
+        
+        modalBody.innerHTML = `
+            <table class="bill-details-table">
+                <tr><td>ইনভয়েস নং:</td><td>${invoiceId}</td></tr>
+                <tr><td>বিলের ধরন:</td><td>চাঁদি এক্সচেঞ্জ</td></tr>
+                <tr><td>গ্রাহকের নাম:</td><td>${bill.customerName || 'N/A'}</td></tr>
+                <tr><td>মোবাইল নম্বর:</td><td>${bill.customerPhone || 'N/A'}</td></tr>
+                <tr><td>তারিখ:</td><td>${new Date(bill.date).toLocaleDateString('bn-BD', {day: 'numeric', month: 'long', year: 'numeric'})}</td></tr>
+                <tr><td colspan="2"><hr></td></tr>
+                <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">নতুন চাঁদির হিসাব</td></tr>
+                <tr><td>নতুন চাঁদির মূল্য:</td><td>₹${toFixedTrim(bill.baseNewValue).toLocaleString('en-IN')}</td></tr>
+                <tr><td>মজুরি:</td><td>₹${bill.labourAmount.toLocaleString('en-IN')}</td></tr>
+                <tr><td><strong>নতুন চাঁদির মোট:</strong></td><td><strong>₹${bill.newGross.toLocaleString('en-IN')}</strong></td></tr>
+                <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+                <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">পুরাতন চাঁদির হিসাব</td></tr>
+                <tr><td>পুরাতন চাঁদির মূল্য (${bill.deduct}% কাটছাঁট পর):</td><td>₹${bill.oldNet.toLocaleString('en-IN')}</td></tr>
+                <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+                ${balanceRow}
+            </table>
+        `;
+    }
     $('#billDetailsModal').style.display = 'flex';
 }
 
 function resetProfit() {
   $('#customerName').value = ''; $('#customerPhone').value = '';
-  $('#profitWeight').value = '10'; $('#basePrice24ct').value = '140000';
-  calculateProfit(); updateAllAnaDisplays();
+  $('#profitWeight').value = '10';
+  $('#basePrice24ct').value = '140000';
+  $('#profitMakingChargeType').value = 'percent';
+  $('#profitMakingChargeValue').value = '12';
+  $('#goldQuality').value = 'Licence';
+  calculateProfit();
+  updateAllAnaDisplays();
 }
 
 function resetExchange(){
-  $('#exchangeCustomerName').value = ''; $('#exchangeCustomerPhone').value = '';
-  $('#newWeight').value='0'; $('#oldWeight').value='0';
-  calculateExchange(false); updateAllAnaDisplays();
+  $('#exchangeCustomerName').value = '';
+  $('#exchangeCustomerPhone').value = '';
+  $('#newWeight').value='0';
+  const price24ct = getVal('basePrice24ct') || 140000;
+  
+  if (currentExchangeMode === 'nakmachi') {
+      $('#newPrice11').value = price24ct * 0.65; 
+      $('#labourType').value = 'percent';
+      $('#labourValue').value='15'; 
+      $('#oldPrice11').value = '141000';
+      $('#deduct').value = '65';
+  } else {
+      $('#newPrice11').value = price24ct;
+      $('#labourType').value = 'percent';
+      $('#labourValue').value='12';
+      $('#oldPrice11').value = '141000';
+      $('#deduct').value = '35';
+  }
+
+  $('#oldWeight').value='0';
+  $('#includeGstExchange').checked = true;
+  calculateExchange(false);
+  updateAllAnaDisplays();
 }
 
 function resetSilverExchange(){
-  $('#silverCustomerName').value = '';  $('#silverCustomerPhone').value = '';
-  $('#newWeightSilver').value='0'; $('#oldWeightSilver').value='0';
-  calculateSilverExchange(false); updateAllAnaDisplays();
+  $('#silverCustomerName').value = ''; 
+  $('#silverCustomerPhone').value = '';
+  $('#newWeightSilver').value='0'; 
+  $('#labourTypeSilver').value = 'percent';
+  $('#labourValueSilver').value='12'; 
+  $('#oldWeightSilver').value='0';
+  $('#newPrice11Silver').value='2050'; 
+  $('#oldPrice11Silver').value='1910';
+  $('#deductSilver').value='35';
+  $('#includeGstExchangeSilver').checked = true;
+  calculateSilverExchange(false);
+  updateAllAnaDisplays();
 }
 
+// --- GOLD LOAN CALCULATOR LOGIC ---
 let gl_transactions = [];
 let gl_currentAccountId = null; 
 
@@ -1692,147 +2395,560 @@ function showToast(msg) {
 }
 
 function gl_loadAccountList() {
-    document.getElementById('gl_savedAccountsList').innerHTML = '<p style="text-align:center;color:#666;">কোনো সেভ করা অ্যাকাউন্ট নেই</p>';
+    const listContainer = document.getElementById('gl_savedAccountsList');
+    const saved = localStorage.getItem('soleman_loan_accounts');
+    const accounts = saved ? JSON.parse(saved) : [];
+    
+    if(accounts.length === 0) {
+        listContainer.innerHTML = '<p style="text-align:center;color:#666;">কোনো সেভ করা অ্যাকাউন্ট নেই</p>';
+        return;
+    }
+    listContainer.innerHTML = accounts.map(acc => `
+        <div class="account-item">
+            <div>
+                <strong>${acc.name}</strong><br>
+                <span style="font-size:12px; color:#666;">${acc.mobile} | শেষ আপডেট: ${new Date(acc.lastUpdated).toLocaleDateString('bn-BD')}</span>
+            </div>
+            <div>
+                <button class="btn btn-sm btn-alt" onclick="gl_loadAccount(${acc.id})">Open</button>
+                <button class="btn btn-sm btn-danger" onclick="gl_deleteAccount(${acc.id})">✕</button>
+            </div>
+        </div>
+    `).join('');
 }
 
-function gl_saveAccount() { showToast("অ্যাকাউন্ট সেভ হয়েছে!"); }
-function gl_loadAccount(id) { showToast("অ্যাকাউন্ট লোড হয়েছে"); }
-function gl_deleteAccount(id) { showToast("অ্যাকাউন্ট মুছে ফেলা হয়েছে"); }
+function gl_saveAccount() {
+    const name = document.getElementById('gl_customerName').value.trim();
+    const mobile = document.getElementById('gl_mobile').value.trim();
+    
+    if (!name) {
+        showToast("গ্রাহকের নাম আবশ্যক!");
+        return;
+    }
+    
+    if (gl_transactions.length === 0) {
+        showToast("কোনো লেনদেন নেই, সেভ করা সম্ভব নয়!");
+        return;
+    }
+    const saved = localStorage.getItem('soleman_loan_accounts');
+    let accounts = saved ? JSON.parse(saved) : [];
+    
+    const accountData = {
+        id: gl_currentAccountId || Date.now(),
+        name: name,
+        mobile: mobile,
+        transactions: gl_transactions,
+        lastUpdated: new Date().toISOString()
+    };
+    if (gl_currentAccountId) {
+        const index = accounts.findIndex(a => a.id === gl_currentAccountId);
+        if (index !== -1) {
+            accounts[index] = accountData;
+            showToast("অ্যাকাউন্ট আপডেট হয়েছে!");
+        }
+    } else {
+        accounts.push(accountData);
+        gl_currentAccountId = accountData.id; 
+        showToast("নতুন অ্যাকাউন্ট সেভ হয়েছে!");
+    }
+    
+    localStorage.setItem('soleman_loan_accounts', JSON.stringify(accounts));
+    gl_loadAccountList();
+}
+
+function gl_loadAccount(id) {
+    const saved = localStorage.getItem('soleman_loan_accounts');
+    const accounts = saved ? JSON.parse(saved) : [];
+    const account = accounts.find(a => a.id === id);
+    
+    if (account) {
+        gl_currentAccountId = account.id;
+        document.getElementById('gl_customerName').value = account.name;
+        document.getElementById('gl_mobile').value = account.mobile || '';
+        gl_transactions = account.transactions;
+        
+        gl_renderTable();
+        gl_calculateInterest(); 
+        
+        showToast("অ্যাকাউন্ট লোড হয়েছে");
+        window.scrollTo({ top: document.getElementById('loan').offsetTop, behavior: 'smooth' });
+    }
+}
+
+function gl_deleteAccount(id) {
+    if (!confirm("আপনি কি নিশ্চিত এই অ্যাকাউন্টটি মুছে ফেলতে চান?")) return;
+    
+    const saved = localStorage.getItem('soleman_loan_accounts');
+    let accounts = saved ? JSON.parse(saved) : [];
+    accounts = accounts.filter(a => a.id !== id);
+    localStorage.setItem('soleman_loan_accounts', JSON.stringify(accounts));
+    
+    if (gl_currentAccountId === id) {
+        gl_confirmReset(); 
+    } else {
+        gl_loadAccountList();
+    }
+    showToast("অ্যাকাউন্ট মুছে ফেলা হয়েছে");
+}
 
 function gl_addTransaction() {
     const date = document.getElementById('gl_transDate').value;
     const amount = parseFloat(document.getElementById('gl_amount').value);
     const type = document.getElementById('gl_type').value;
-    if (!date || isNaN(amount) || amount <= 0) { showToast("সঠিক তারিখ এবং টাকার পরিমাণ দিন!"); return; }
+    if (!date || isNaN(amount) || amount <= 0) {
+      showToast("সঠিক তারিখ এবং টাকার পরিমাণ দিন!");
+      return;
+    }
     gl_transactions.push({ id: Date.now(), date, amount, type });
+    gl_transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
     gl_renderTable(); 
+    document.getElementById('gl_amount').value = '';
     showToast("লেনদেন যোগ হয়েছে");
 }
 
 function gl_deleteTransaction(id) {
     if(!confirm("আপনি কি নিশ্চিত?")) return;
     gl_transactions = gl_transactions.filter(t => t.id !== id);
-    gl_renderTable(); showToast("মুছে ফেলা হয়েছে");
+    gl_renderTable();
+    showToast("মুছে ফেলা হয়েছে");
 }
 
 function gl_renderTable() {
     const tbody = document.querySelector('#gl_transTable tbody');
     const emptyState = document.getElementById('gl_emptyState');
     tbody.innerHTML = '';
-    if (gl_transactions.length === 0) { emptyState.style.display = 'block'; return; }
+    if (gl_transactions.length === 0) {
+      emptyState.style.display = 'block';
+      return;
+    }
     emptyState.style.display = 'none';
     gl_transactions.forEach(t => {
       const row = document.createElement('tr');
-      row.innerHTML = `<td>${t.date}</td><td>${t.type}</td><td>₹${t.amount}</td><td><button onclick="gl_deleteTransaction(${t.id})">✕</button></td>`;
+      const isBorrow = t.type === 'borrow';
+      const badgeClass = isBorrow ? 'badge-borrow' : 'badge-repay';
+      const typeText = isBorrow ? 'ঋণ' : 'জমা';
+      const color = isBorrow ? '#ef4444' : '#10b981';
+      row.innerHTML = `
+        <td>${new Date(t.date).toLocaleDateString('en-GB')}</td>
+        <td><span class="badge ${badgeClass}">${typeText}</span></td>
+        <td style="text-align:right; color:${color}; font-weight:bold;">${t.amount.toLocaleString('en-IN')}</td>
+        <td style="text-align:right;"><button class="delete-btn-icon" onclick="gl_deleteTransaction(${t.id})">✕</button></td>
+      `;
       tbody.appendChild(row);
     });
 }
 
 function gl_calculateInterest() {
-    showToast("হিসাব করা হয়েছে");
+    if (gl_transactions.length === 0) { showToast("কোনো লেনদেন নেই!"); return; }
+    const endDateInput = document.getElementById('gl_calcDate').value;
+    if (!endDateInput) { showToast("শেষ তারিখ দিন!"); return; }
+    
+    const endDate = new Date(endDateInput);
+    let principal = 0;
+    let totalInterest = 0;
+    let breakdownHTML = '';
+    for (let i = 0; i < gl_transactions.length; i++) {
+      const trans = gl_transactions[i];
+      const transDate = new Date(trans.date);
+      if (transDate > endDate) continue;
+      
+      let nextDate = endDate;
+      if (i < gl_transactions.length - 1) {
+        const nextTransDate = new Date(gl_transactions[i+1].date);
+        if (nextTransDate < endDate) nextDate = nextTransDate;
+      }
+      
+      if (trans.type === 'borrow') principal += trans.amount;
+      else principal -= trans.amount;
+      
+      const timeDiff = nextDate - transDate;
+      const days = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+      let segmentInterest = 0;
+      let durationStr = "0 দিন";
+      if (days > 0 && principal > 0) {
+        let months = Math.floor(days / 30);
+        let remDays = days % 30;
+        
+        let calcMonths = months;
+        let calcRemDays = remDays;
+        if (remDays > 10) { calcMonths += 1; calcRemDays = 0; }
+        const mRate = 0.03;
+        const dRate = 0.03 / 30;
+        segmentInterest = (principal * calcMonths * mRate) + (principal * calcRemDays * dRate);
+        totalInterest += segmentInterest;
+        durationStr = `${months > 0 ? months + ' মাস ' : ''}${remDays} দিন`;
+        
+        breakdownHTML += `
+            <tr>
+                <td>
+                    <div style="font-weight:bold; font-size:12px;">${formatDateShort(transDate)} থেকে</div>
+                    <div style="color:var(--text-light); font-size:11px;">${formatDateShort(nextDate)} পর্যন্ত</div>
+                </td>
+                <td style="font-weight:bold;">₹${principal.toLocaleString('en-IN')}</td>
+                <td>${durationStr}</td>
+                <td style="text-align:right; color:var(--primary-dark); font-weight:bold;">₹${Math.round(segmentInterest)}</td>
+            </tr>
+        `;
+      }
+    }
+    
+    const start = new Date(gl_transactions[0].date);
+    let durationText = "ভুল তারিখ";
+    if (endDate >= start) {
+        let y = endDate.getFullYear() - start.getFullYear();
+        let m = endDate.getMonth() - start.getMonth();
+        let d = endDate.getDate() - start.getDate();
+        if (d < 0) { m--; d += new Date(endDate.getFullYear(), endDate.getMonth(), 0).getDate(); }
+        if (m < 0) { y--; m += 12; }
+        let parts = [];
+        if (y > 0) parts.push(y + " বছর");
+        if (m > 0) parts.push(m + " মাস");
+        if (d > 0) parts.push(d + " দিন");
+        durationText = parts.length ? parts.join(", ") : "০ দিন";
+    }
+    document.getElementById('gl_durationText').innerText = durationText;
+    animateValue(document.getElementById('gl_finalPrincipal'), 0, principal, 1000);
+    animateValue(document.getElementById('gl_totalInterest'), 0, totalInterest, 1000);
+    animateValue(document.getElementById('gl_grandTotal'), 0, principal + totalInterest, 1000);
+    
+    document.getElementById('gl_resultGrid').classList.add('show');
+    
+    if (breakdownHTML === '') {
+        breakdownHTML = '<tr><td colspan="4" style="text-align:center; padding:15px;">হিসাবের জন্য পর্যাপ্ত সময় বা আসল নেই।</td></tr>';
+    }
+    document.getElementById('gl_breakdownBody').innerHTML = breakdownHTML;
+    
+    const btn = document.getElementById('gl_detailsBtn');
+    btn.style.display = 'block';
+    btn.textContent = 'হিসাব দেখুন 👁️';
+    document.getElementById('gl_detailsContainer').classList.remove('open'); 
 }
 
-function gl_toggleDetails() { showToast("বিস্তারিত দেখুন"); }
-function gl_confirmReset() { showToast("রিসেট করা হয়েছে"); }
-function gl_previewBill() { showToast("প্রিভিউ দেখা যাচ্ছে"); }
-function gl_saveAndPrintBill() { showToast("প্রিন্ট করা হচ্ছে..."); }
+function gl_toggleDetails() {
+    const container = document.getElementById('gl_detailsContainer');
+    const btn = document.getElementById('gl_detailsBtn');
+    
+    if (container.classList.contains('open')) {
+        container.classList.remove('open');
+        btn.textContent = 'হিসাব দেখুন 👁️';
+    } else {
+        container.classList.add('open');
+        btn.textContent = 'বন্ধ করুন 👁️';
+    }
+}
 
-function loadFromServer() { console.log("Data loaded from server."); }
-function saveToServer() { console.log("Data saved to server."); }
+function gl_confirmReset() {
+    if (gl_transactions.length === 0 && !gl_currentAccountId) {
+      return;
+    }
+    if(confirm("আপনি কি নতুন হিসাব শুরু করতে চান? বর্তমান ভিউ পরিষ্কার করা হবে।")) {
+      gl_transactions = [];
+      gl_currentAccountId = null; 
+      
+      gl_renderTable();
+      
+      document.getElementById('gl_resultGrid').classList.remove('show');
+      document.getElementById('gl_durationText').innerText = "-";
+      document.getElementById('gl_finalPrincipal').innerText = "0";
+      document.getElementById('gl_totalInterest').innerText = "0";
+      document.getElementById('gl_grandTotal').innerText = "0";
+      
+      document.getElementById('gl_detailsBtn').style.display = 'none';
+      document.getElementById('gl_detailsContainer').classList.remove('open');
+      document.getElementById('gl_breakdownBody').innerHTML = "";
+      
+      document.getElementById('gl_customerName').value = "";
+      document.getElementById('gl_mobile').value = "";
+      document.getElementById('gl_amount').value = "";
+      document.getElementById('gl_transDate').valueAsDate = new Date();
+      document.getElementById('gl_calcDate').valueAsDate = new Date();
+      showToast("নতুন হিসাবের জন্য প্রস্তুত");
+    }
+}
 
+function formatDateShort(d) {
+    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
+}
+
+// --- GOLD LOAN BILL PRINT & PREVIEW ---
+function gl_generateBillHTML() {
+    const customerName = document.getElementById('gl_customerName').value || 'N/A';
+    const customerMobile = document.getElementById('gl_mobile').value || 'N/A';
+    const today = new Date().toLocaleDateString('bn-BD', { year: 'numeric', month: 'long', day: 'numeric' });
+    const invoiceId = `GL-${Date.now().toString().slice(-6)}`;
+
+    const durationText = document.getElementById('gl_durationText').innerText;
+    const finalPrincipal = document.getElementById('gl_finalPrincipal').innerText;
+    const totalInterest = document.getElementById('gl_totalInterest').innerText;
+    const grandTotal = document.getElementById('gl_grandTotal').innerText;
+
+    let transRows = '';
+    gl_transactions.forEach(t => {
+        const typeText = t.type === 'borrow' ? 'ঋণ গ্রহণ (টাকা দেওয়া হলো)' : 'পরিশোধ (টাকা নেওয়া হলো)';
+        const color = t.type === 'borrow' ? '#ef4444' : '#10b981';
+        transRows += `<tr>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${new Date(t.date).toLocaleDateString('en-GB')}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0;">${typeText}</td>
+            <td style="padding: 8px; border-bottom: 1px solid #e2e8f0; text-align:right; font-weight:bold; color:${color};">₹${t.amount.toLocaleString('en-IN')}</td>
+        </tr>`;
+    });
+
+    return `
+        <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
+            <div style="text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-size: 28px; color: #0284c7;">সোলেমান জুয়েলার্স</h2>
+                <p style="margin: 5px 0;">ঠিকানা: ভাদুরিয়াপাড়া বাজার | মোবাইল: 8967575884</p>
+                <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">স্বর্ণ ঋণ বিল</h3>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>গ্রাহকের নাম:</strong> ${customerName}</div>
+                <div><strong>তারিখ:</strong> ${today}</div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div><strong>মোবাইল নম্বর:</strong> ${customerMobile}</div>
+                <div><strong>ইনভয়েস নং:</strong> ${invoiceId}</div>
+            </div>
+            
+            <h4 style="margin-bottom:10px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 5px; color: #0f172a;">লেনদেনের বিবরণ</h4>
+            <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background-color: #f1f5f9;">
+                        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">তারিখ</th>
+                        <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">বিবরণ</th>
+                        <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">পরিমাণ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${transRows}
+                </tbody>
+            </table>
+            
+            <table style="width: 100%; border-collapse: collapse; font-size: 15px; margin-top: 10px;">
+                <tbody>
+                    <tr><td style="padding: 8px 0;"><strong>মোট সময়কাল:</strong></td><td style="text-align:right;">${durationText}</td></tr>
+                    <tr><td style="padding: 8px 0;"><strong>বর্তমান আসল:</strong></td><td style="text-align:right;">${finalPrincipal}</td></tr>
+                    <tr><td style="padding: 8px 0; border-bottom: 2px solid #cbd5e1;"><strong>মোট সুদ (৩% মাসিক):</strong></td><td style="text-align:right; border-bottom: 2px solid #cbd5e1;">${totalInterest}</td></tr>
+                    <tr><td style="padding: 12px 0; font-size: 18px;"><strong>সর্বমোট পাওনা:</strong></td><td style="text-align:right; font-size: 20px; font-weight:bold; color:var(--success-color);">${grandTotal}</td></tr>
+                </tbody>
+            </table>
+            
+            <div style="margin-top: 40px; text-align: right;">
+                <p style="margin: 0;">--------------------------</p>
+                <p style="margin: 5px 0;">স্বাক্ষর</p>
+            </div>
+        </div>
+    `;
+}
+
+function gl_previewBill() {
+    if (gl_transactions.length === 0) {
+        showToast("কোনো লেনদেন নেই! আগে হিসাব করুন।");
+        return;
+    }
+    gl_calculateInterest(); 
+
+    document.getElementById('modalTitle').textContent = 'স্বর্ণ ঋণ বিল প্রিভিউ';
+    document.getElementById('modalBody').innerHTML = gl_generateBillHTML();
+    document.getElementById('billDetailsModal').style.display = 'flex';
+}
+
+function gl_saveAndPrintBill() {
+    if (gl_transactions.length === 0) {
+        showToast("প্রিন্ট করার আগে লেনদেন যোগ করুন!");
+        return;
+    }
+    gl_calculateInterest(); 
+    
+    const name = document.getElementById('gl_customerName').value.trim();
+    if (name) gl_saveAccount(); 
+
+    const billContent = gl_generateBillHTML();
+    const printWindow = window.open('', '', 'height=800,width=800');
+    printWindow.document.write('<html><head><title>Gold Loan Bill</title>');
+    printWindow.document.write('<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>');
+    printWindow.document.write('</head><body>');
+    printWindow.document.write(billContent);
+    printWindow.document.write('</body></html>');
+    printWindow.document.close();
+    
+    setTimeout(() => { printWindow.print(); }, 500);
+}
+
+// --- SERVER SYNC SYSTEM ---
+function loadFromServer() {
+    fetch('server.php?t=' + new Date().getTime())
+    .then(response => response.json())
+    .then(data => {
+        if(data.bills) localStorage.setItem('solemanJewellersBills', data.bills);
+        if(data.loans) localStorage.setItem('soleman_loan_accounts', data.loans);
+        if(data.settings) localStorage.setItem('solemanJewellersSettings', data.settings);
+        
+        if(typeof displayBillHistory === 'function') displayBillHistory();
+        if(typeof gl_loadAccountList === 'function') gl_loadAccountList();
+        console.log("Data loaded from server.");
+    })
+    .catch(err => console.log("Load Error:", err));
+}
+
+function saveToServer() {
+    const allData = {
+        bills: localStorage.getItem('solemanJewellersBills'),
+        loans: localStorage.getItem('soleman_loan_accounts'),
+        settings: localStorage.getItem('solemanJewellersSettings')
+    };
+    
+    fetch('server.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(allData)
+    }).then(() => console.log("Data saved to server."));
+}
+
+const originalSetItem = Storage.prototype.setItem;
+Storage.prototype.setItem = function(key, value) {
+    originalSetItem.apply(this, arguments);
+    if(key.includes('soleman')) {
+        saveToServer();
+    }
+};
+
+// --- ANA/GRAM CONVERSION LISTENERS ---
 let isCalculating = false;
 function setupWeightConversion(gramId, anaId) {
     const gramInput = $(`#${gramId}`);
     const anaInput = $(`#${anaId}`);
+    
     if (!gramInput || !anaInput) return;
+
+    const displaySpan = document.createElement('div');
+    displaySpan.style.cssText = 'font-size: 12px; color: #555; margin-top: 4px; font-weight: normal; display: none; font-style: italic;';
+    anaInput.parentNode.appendChild(displaySpan);
+
+    function updateTraditionalDisplay(totalAna) {
+        if (!totalAna || totalAna <= 0) {
+            displaySpan.style.display = 'none';
+            displaySpan.textContent = "";
+            return;
+        }
+        
+        displaySpan.style.display = 'block';
+        
+        let vori = Math.floor(totalAna / 16);
+        let remainingAna = totalAna % 16;
+        let ana = Math.floor(remainingAna);
+        
+        let fractionalAna = remainingAna - ana; 
+        let kuch = Math.round((fractionalAna * 100) / 16.6666667); 
+
+        if (kuch >= 6) { 
+            kuch -= 6; 
+            ana += 1; 
+        }
+        if (ana >= 16) { 
+            ana -= 16; 
+            vori += 1; 
+        }
+
+        let parts = [];
+        if (vori > 0) parts.push(`${vori} ভরি`);
+        if (ana > 0) parts.push(`${ana} আনা`);
+        if (kuch > 0) parts.push(`${kuch} কুঁচ`);
+        
+        displaySpan.textContent = parts.length > 0 ? "~ " + parts.join(" ") : "";
+    }
+
     gramInput.addEventListener('input', () => {
         if (isCalculating) return;
         isCalculating = true;
-        anaInput.value = (getVal(gramId) * GRAMS_TO_ANA_RATE).toFixed(3);
+        const grams = getVal(gramId);
+        const anas = grams * GRAMS_TO_ANA_RATE;
+        anaInput.value = grams > 0 ? anas.toFixed(3) : '';
+        updateTraditionalDisplay(anas);
+        
+        if (typeof updateAllAnaDisplays === 'function') updateAllAnaDisplays();
+
         isCalculating = false;
     });
+    
     anaInput.addEventListener('input', () => {
         if (isCalculating) return;
         isCalculating = true;
-        gramInput.value = (getVal(anaId) / GRAMS_TO_ANA_RATE).toFixed(3);
+        const anas = getVal(anaId);
+        gramInput.value = anas > 0 ? (anas / GRAMS_TO_ANA_RATE).toFixed(3) : ''; 
+        gramInput.dispatchEvent(new Event('input', { bubbles: true }));
+        updateTraditionalDisplay(anas);
         isCalculating = false;
     });
+    
+    setTimeout(() => {
+        updateTraditionalDisplay(getVal(anaId));
+    }, 200);
 }
 
-function updateAllAnaDisplays() {}
-
-// --- LIVE RATE POPUP LOGIC ---
-let fetched24k10g = 0;
-
-function fetchAutomaticLiveRate() {
-    // live_rate.php থেকে ডাটা ফেচ করা হচ্ছে
-    fetch('live_rate.php')
-        .then(res => res.json())
-        .then(data => {
-            if(data && data.INR && data.INR.gold_rates) {
-                // ১ গ্রামের দাম নিয়ে তাকে ১০ দিয়ে গুণ করা হচ্ছে
-                const price1g = data.INR.gold_rates.Price_G;
-                fetched24k10g = Math.round(price1g * 10);
-                
-                // ২২ ক্যারেটের দাম (২৪ ক্যারেটের ৯১.৬৭%)
-                const fetched22k10g = Math.round(fetched24k10g * 0.9167);
-
-                const content = `
-                    <div style="border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 8px;">
-                      ২৪ ক্যারেট: <span class="rate-val">₹${fetched24k10g.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div>
-                      ২২ ক্যারেট: <span class="rate-val">₹${fetched22k10g.toLocaleString('en-IN')}</span>
-                    </div>
-                `;
-                document.getElementById('popupRateContent').innerHTML = content;
-                document.getElementById('liveRatePopup').classList.add('show');
-            } else {
-                document.getElementById('popupRateContent').innerHTML = "রেট লোড করতে সমস্যা হয়েছে।";
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            document.getElementById('popupRateContent').innerHTML = "সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি!";
-        });
-}
-
-function applyPopupRate() {
-    if(fetched24k10g > 0) {
-        // সফটওয়্যারের মূল ইনপুটগুলোতে দাম বসিয়ে দেওয়া
-        document.getElementById('basePrice24ct').value = fetched24k10g;
-        if(document.getElementById('otn_BasePrice24ct')) {
-            document.getElementById('otn_BasePrice24ct').value = fetched24k10g;
+function updateAllAnaDisplays() {
+    ['profitWeightInAna', 'newWeightInAna', 'oldWeightInAna', 'newWeightSilverInAna', 'oldWeightSilverInAna', 'otn_OldWeightInAna', 'otn_NewWeightInAna'].forEach(id => {
+        const input = document.getElementById(id);
+        if(input) {
+             const event = new Event('input');
+             input.dispatchEvent(event);
         }
-        
-        if (typeof syncAndSavePrice === "function") {
-            syncAndSavePrice(fetched24k10g);
-        }
-        if (typeof calculateProfit === "function") {
-            calculateProfit();
-        }
-        
-        showToast("সফটওয়্যারে আজকের লাইভ রেট আপডেট করা হয়েছে!");
-        document.getElementById('liveRatePopup').classList.remove('show');
-    }
+    });
 }
 
 // --- INITIALIZATION ---
 window.onload = function() {
-    let priceSaveTimeout;
     
+    // --- AUTO PRICE SAVE FEATURE ---
+    let priceSaveTimeout;
+    let otherPriceSaveTimeout; 
+
     function syncAndSavePrice(newPrice) {
         document.getElementById('basePrice24ct').value = newPrice;
         document.getElementById('otn_BasePrice24ct').value = newPrice;
+        
         if (currentExchangeMode === 'nakmachi') {
             document.getElementById('newPrice11').value = newPrice * 0.65;
         } else {
             document.getElementById('newPrice11').value = newPrice;
         }
+
         fetchLivePrice();
+
+        clearTimeout(priceSaveTimeout);
+        priceSaveTimeout = setTimeout(() => {
+            fetch('save_price.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ goldPrice: newPrice })
+            })
+            .then(response => response.json())
+            .then(data => console.log('Gold Price Saved to Server:', newPrice))
+            .catch(error => console.error('Error saving price:', error));
+        }, 1000); 
     }
 
+    function saveOtherPriceToServer(key, value) {
+        clearTimeout(otherPriceSaveTimeout);
+        otherPriceSaveTimeout = setTimeout(() => {
+            let payload = {};
+            payload[key] = value; 
+
+            fetch('save_price.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(response => response.json())
+            .then(data => console.log(key + ' Saved to Server:', value))
+            .catch(error => console.error('Error saving ' + key + ':', error));
+        }, 1000); 
+    }
+
+    // --- ইভেন্ট লিসেনারস ---
     const priceInput1 = document.getElementById('basePrice24ct');
+    const priceInput2 = document.getElementById('otn_BasePrice24ct');
+
     if(priceInput1) {
         priceInput1.addEventListener('input', function() {
             syncAndSavePrice(this.value);
@@ -1840,6 +2956,59 @@ window.onload = function() {
         });
     }
 
+    if(priceInput2) {
+        priceInput2.addEventListener('input', function() {
+            syncAndSavePrice(this.value);
+            if(typeof otn_calculateOldToNew === 'function') {
+                otn_calculateOldToNew(); 
+            }
+        });
+    }
+
+    const oldGoldPriceInput = document.getElementById('oldPrice11');
+    if (oldGoldPriceInput) {
+        oldGoldPriceInput.addEventListener('input', function() {
+            const saveKey = currentExchangeMode === 'nakmachi' ? 'oldGoldPriceNakmachi' : 'oldGoldPriceGeneral';
+            saveOtherPriceToServer(saveKey, this.value);
+        });
+    }
+
+    const newSilverPriceInput = document.getElementById('newPrice11Silver');
+    if (newSilverPriceInput) {
+        newSilverPriceInput.addEventListener('input', function() {
+            saveOtherPriceToServer('newSilverPrice', this.value);
+        });
+    }
+
+    const oldSilverPriceInput = document.getElementById('oldPrice11Silver');
+    if (oldSilverPriceInput) {
+        oldSilverPriceInput.addEventListener('input', function() {
+            saveOtherPriceToServer('oldSilverPrice', this.value);
+        });
+    }
+
+    // --- AUTO PRICE UPDATE FROM FILE ---
+    function updatePriceFromServer() {
+        fetch('price.json?t=' + new Date().getTime())
+        .then(response => response.json())
+        .then(data => {
+            if(data.goldPrice) {
+                document.getElementById('basePrice24ct').value = data.goldPrice;
+                document.getElementById('otn_BasePrice24ct').value = data.goldPrice;
+                document.getElementById('newPrice11').value = currentExchangeMode === 'nakmachi' ? data.goldPrice * 0.65 : data.goldPrice;
+                fetchLivePrice();
+            }
+            if(data.oldGoldPriceGeneral && currentExchangeMode === 'general') document.getElementById('oldPrice11').value = data.oldGoldPriceGeneral;
+            if(data.oldGoldPriceNakmachi && currentExchangeMode === 'nakmachi') document.getElementById('oldPrice11').value = data.oldGoldPriceNakmachi;
+            if(data.newSilverPrice) document.getElementById('newPrice11Silver').value = data.newSilverPrice;
+            if(data.oldSilverPrice) document.getElementById('oldPrice11Silver').value = data.oldSilverPrice;
+        })
+        .catch(error => console.log('Price update failed:', error));
+    }
+    
+    setTimeout(updatePriceFromServer, 1000);
+    loadFromServer();
+    
     $('#todayDate').textContent = new Date().toLocaleDateString('bn-BD',{year:'numeric',month:'long',day:'numeric'});
     loadSettings();
     document.getElementById('gl_transDate').valueAsDate = new Date();
@@ -1854,6 +3023,63 @@ window.onload = function() {
     setupWeightConversion('otn_OldWeight', 'otn_OldWeightInAna');
     setupWeightConversion('otn_NewWeight', 'otn_NewWeightInAna');
     
+    document.getElementById('goldQuality').addEventListener('change', function() {
+        const makingType = document.getElementById('profitMakingChargeType').value;
+        if (makingType === 'percent') {
+            if (this.value === 'bengali' || this.value === 'desi_bengali') {
+                document.getElementById('profitMakingChargeValue').value = '15';
+            } else if (this.value === 'kdm') {
+                document.getElementById('profitMakingChargeValue').value = '13';
+            } else {
+                document.getElementById('profitMakingChargeValue').value = '12'; 
+            }
+            calculateProfit();
+        }
+    });
+
+    document.getElementById('profitMakingChargeType').addEventListener('change', function() {
+        const makingChargeValueInput = document.getElementById('profitMakingChargeValue');
+        if (this.value === 'percent') {
+            const currentQuality = document.getElementById('goldQuality').value;
+            if (currentQuality === 'bengali' || currentQuality === 'desi_bengali') {
+                makingChargeValueInput.value = '15';
+            } else if (currentQuality === 'kdm') {
+                makingChargeValueInput.value = '13';
+            } else {
+                makingChargeValueInput.value = '12';
+            }
+        } else if (this.value === 'pergram') {
+            makingChargeValueInput.value = '550';
+        } else if (this.value === 'fixed') {
+            makingChargeValueInput.value = '0';
+        }
+        calculateProfit();
+    });
+    
+    if (document.getElementById('profitMakingChargeType').value === 'percent') {
+        const currentQuality = document.getElementById('goldQuality').value;
+        if (currentQuality === 'bengali' || currentQuality === 'desi_bengali') {
+            document.getElementById('profitMakingChargeValue').value = '15';
+        } else if (currentQuality === 'kdm') {
+            document.getElementById('profitMakingChargeValue').value = '13';
+        } else {
+            document.getElementById('profitMakingChargeValue').value = '12';
+        }
+    }
+    
+    document.querySelectorAll('#profit input, #profit select').forEach(input => {
+        input.addEventListener('input', () => { calculateProfit(); });
+    });
+    document.querySelectorAll('#exchange input, #exchange select').forEach(input => {
+        input.addEventListener('input', () => { calculateExchange(false); });
+    });
+    document.querySelectorAll('#silverExchange input, #silverExchange select').forEach(input => {
+        input.addEventListener('input', () => { calculateSilverExchange(false); });
+    });
+    document.querySelectorAll('#oldToNew input, #oldToNew select').forEach(input => {
+        input.addEventListener('input', otn_calculateOldToNew);
+    });
+    
     const modal = $('#billDetailsModal');
     $('#modalCloseBtn').onclick = () => { modal.style.display = 'none'; };
     modal.onclick = (event) => { if (event.target === modal) { modal.style.display = 'none'; } };
@@ -1861,11 +3087,13 @@ window.onload = function() {
     otnModal.onclick = (event) => { if (event.target === otnModal) { otnModal.style.display = 'none'; } };
     
     openTab('profit');
+    resetProfit();
+    resetExchange();
+    resetSilverExchange();
+    otn_resetOldToNew();
     fetchLivePrice();
-
-    // পেজ লোড হওয়ার ২.৫ সেকেন্ড পর পপ-আপ অটোমেটিক চলে আসবে
-    setTimeout(fetchAutomaticLiveRate, 2500);
 };
 </script>
 </body>
 </html>
+
