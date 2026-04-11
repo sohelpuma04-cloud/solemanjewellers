@@ -1218,65 +1218,6 @@
   <div id="toast">Message here...</div>
 
 <script>
-  let fetched24k10g = 0;
-
-function fetchAutomaticLiveRate() {
-    // live_rate.php থেকে ডাটা ফেচ করা হচ্ছে
-    fetch('live_rate.php')
-        .then(res => res.json())
-        .then(data => {
-            if(data && data.INR && data.INR.gold_rates) {
-                // ১ গ্রামের দাম নিয়ে তাকে ১০ দিয়ে গুণ করা হচ্ছে
-                const price1g = data.INR.gold_rates.Price_G;
-                fetched24k10g = Math.round(price1g * 10);
-                
-                // ২২ ক্যারেটের দাম (২৪ ক্যারেটের ৯১.৬৭%)
-                const fetched22k10g = Math.round(fetched24k10g * 0.9167);
-
-                const content = `
-                    <div style="border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 8px;">
-                      ২৪ ক্যারেট: <span class="rate-val">₹${fetched24k10g.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div>
-                      ২২ ক্যারেট: <span class="rate-val">₹${fetched22k10g.toLocaleString('en-IN')}</span>
-                    </div>
-                `;
-                document.getElementById('popupRateContent').innerHTML = content;
-                document.getElementById('liveRatePopup').classList.add('show');
-            } else {
-                document.getElementById('popupRateContent').innerHTML = "রেট লোড করতে সমস্যা হয়েছে।";
-            }
-        })
-        .catch(err => {
-            console.log(err);
-            document.getElementById('popupRateContent').innerHTML = "সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি!";
-        });
-}
-
-function applyPopupRate() {
-    if(fetched24k10g > 0) {
-        // সফটওয়্যারের মূল ইনপুটগুলোতে দাম বসিয়ে দেওয়া
-        document.getElementById('basePrice24ct').value = fetched24k10g;
-        if(document.getElementById('otn_BasePrice24ct')) {
-            document.getElementById('otn_BasePrice24ct').value = fetched24k10g;
-        }
-        
-        if (typeof syncAndSavePrice === "function") {
-            syncAndSavePrice(fetched24k10g);
-        }
-        if (typeof calculateProfit === "function") {
-            calculateProfit();
-        }
-        
-        showToast("সফটওয়্যারে আজকের লাইভ রেট আপডেট করা হয়েছে!");
-        document.getElementById('liveRatePopup').classList.remove('show');
-    }
-}
-
-// পেজ লোড হওয়ার ২.৫ সেকেন্ড পর পপ-আপ অটোমেটিক চলে আসবে
-window.addEventListener('load', () => {
-    setTimeout(fetchAutomaticLiveRate, 2500);
-});
 // --- CONSTANTS & UTILITY FUNCTIONS ---
 const $ = (selector) => document.querySelector(selector);
 const getVal = (id) => parseFloat($(`#${id}`).value) || 0;
@@ -2833,46 +2774,7 @@ function gl_saveAndPrintBill() {
     
     setTimeout(() => { printWindow.print(); }, 500);
 }
-/* Live Rate Popup Styles */
-  .live-rate-popup {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--card-background);
-    backdrop-filter: blur(12px);
-    border-left: 4px solid var(--warning-color);
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    z-index: 9999;
-    width: 280px;
-    transform: translateX(150%);
-    transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    border-top: 1px solid rgba(255,255,255,0.5);
-  }
-  .live-rate-popup.show {
-    transform: translateX(0);
-  }
-  .close-popup-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    color: #94a3b8;
-    cursor: pointer;
-    transition: color 0.3s;
-  }
-  .close-popup-btn:hover {
-    color: var(--danger-color);
-  }
-  .rate-val {
-    font-weight: 700;
-    color: var(--primary-dark);
-    font-size: 1.1em;
-    float: right;
-  }
+
 // --- SERVER SYNC SYSTEM ---
 function loadFromServer() {
     fetch('server.php?t=' + new Date().getTime())
@@ -3191,19 +3093,7 @@ window.onload = function() {
     otn_resetOldToNew();
     fetchLivePrice();
 };
-</script> 
-<div id="liveRatePopup" class="live-rate-popup">
-  <button class="close-popup-btn" onclick="document.getElementById('liveRatePopup').classList.remove('show')">&times;</button>
-  <h4 style="margin-top:0; display:flex; align-items:center; gap:8px;">
-    <svg class="icon"><use href="#icon-jewelry"/></svg> লাইভ গোল্ড রেট (১০ গ্রাম)
-  </h4>
-  <div id="popupRateContent" style="margin-bottom: 15px; font-size: 15px; line-height: 1.8;">
-    রেট লোড হচ্ছে... ⏳
-  </div>
-  <button class="btn btn-sm btn-outline" onclick="applyPopupRate()" style="width: 100%; margin: 0;">
-    সফটওয়্যারে আপডেট করুন
-  </button>
-</div>
+</script>
 </body>
 </html>
 
