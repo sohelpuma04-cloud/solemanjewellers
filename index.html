@@ -1218,6 +1218,65 @@
   <div id="toast">Message here...</div>
 
 <script>
+  let fetched24k10g = 0;
+
+function fetchAutomaticLiveRate() {
+    // live_rate.php থেকে ডাটা ফেচ করা হচ্ছে
+    fetch('live_rate.php')
+        .then(res => res.json())
+        .then(data => {
+            if(data && data.INR && data.INR.gold_rates) {
+                // ১ গ্রামের দাম নিয়ে তাকে ১০ দিয়ে গুণ করা হচ্ছে
+                const price1g = data.INR.gold_rates.Price_G;
+                fetched24k10g = Math.round(price1g * 10);
+                
+                // ২২ ক্যারেটের দাম (২৪ ক্যারেটের ৯১.৬৭%)
+                const fetched22k10g = Math.round(fetched24k10g * 0.9167);
+
+                const content = `
+                    <div style="border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 8px;">
+                      ২৪ ক্যারেট: <span class="rate-val">₹${fetched24k10g.toLocaleString('en-IN')}</span>
+                    </div>
+                    <div>
+                      ২২ ক্যারেট: <span class="rate-val">₹${fetched22k10g.toLocaleString('en-IN')}</span>
+                    </div>
+                `;
+                document.getElementById('popupRateContent').innerHTML = content;
+                document.getElementById('liveRatePopup').classList.add('show');
+            } else {
+                document.getElementById('popupRateContent').innerHTML = "রেট লোড করতে সমস্যা হয়েছে।";
+            }
+        })
+        .catch(err => {
+            console.log(err);
+            document.getElementById('popupRateContent').innerHTML = "সার্ভারের সাথে সংযোগ স্থাপন করা যায়নি!";
+        });
+}
+
+function applyPopupRate() {
+    if(fetched24k10g > 0) {
+        // সফটওয়্যারের মূল ইনপুটগুলোতে দাম বসিয়ে দেওয়া
+        document.getElementById('basePrice24ct').value = fetched24k10g;
+        if(document.getElementById('otn_BasePrice24ct')) {
+            document.getElementById('otn_BasePrice24ct').value = fetched24k10g;
+        }
+        
+        if (typeof syncAndSavePrice === "function") {
+            syncAndSavePrice(fetched24k10g);
+        }
+        if (typeof calculateProfit === "function") {
+            calculateProfit();
+        }
+        
+        showToast("সফটওয়্যারে আজকের লাইভ রেট আপডেট করা হয়েছে!");
+        document.getElementById('liveRatePopup').classList.remove('show');
+    }
+}
+
+// পেজ লোড হওয়ার ২.৫ সেকেন্ড পর পপ-আপ অটোমেটিক চলে আসবে
+window.addEventListener('load', () => {
+    setTimeout(fetchAutomaticLiveRate, 2500);
+});
 // --- CONSTANTS & UTILITY FUNCTIONS ---
 const $ = (selector) => document.querySelector(selector);
 const getVal = (id) => parseFloat($(`#${id}`).value) || 0;
