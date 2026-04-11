@@ -3093,7 +3093,19 @@ window.onload = function() {
     otn_resetOldToNew();
     fetchLivePrice();
 };
-</script>
+</script> 
+  <div id="liveRatePopup" class="live-rate-popup">
+  <button class="close-popup-btn" onclick="document.getElementById('liveRatePopup').classList.remove('show')">&times;</button>
+  <h4 style="margin-top:0; display:flex; align-items:center; gap:8px;">
+    <svg class="icon"><use href="#icon-jewelry"/></svg> লাইভ গোল্ড রেট (১০ গ্রাম)
+  </h4>
+  <div id="popupRateContent" style="margin-bottom: 15px; font-size: 15px; line-height: 1.8;">
+    রেট লোড হচ্ছে... ⏳
+  </div>
+  <button class="btn btn-sm btn-outline" onclick="applyPopupRate()" style="width: 100%; margin: 0;">
+    সফটওয়্যারে আপডেট করুন
+  </button>
+</div>
 </body>
 </html>
 
