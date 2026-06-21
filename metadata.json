@@ -1,6 +1,0 @@
-{
-  "name": "Soleman Jewellers Calculator",
-  "description": "Bilingual (Bangla & English) jewellery calculator and gold loan manager with persistent Node.js API storage.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
