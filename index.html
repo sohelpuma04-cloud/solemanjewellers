@@ -11,7 +11,26 @@
     <link rel="apple-touch-icon" sizes="167x167" href="Logo.jpg">
     <link rel="icon" type="image/jpeg" href="Logo.jpg">
 
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration (your project)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCk_MKmwMjYMwAqAbdRRTWMLoShaCZ9Tyg",
+            authDomain: "soleman-jewellers-57358.firebaseapp.com",
+            projectId: "soleman-jewellers-57358",
+            storageBucket: "soleman-jewellers-57358.firebasestorage.app",
+            messagingSenderId: "514758884732",
+            appId: "1:514758884732:web:e1981dcdb0bba667dcb8f9"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+    </script>
+
     <style>
+        /* (your existing CSS – kept exactly as before) */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
@@ -66,8 +85,6 @@
             0% { transform: translateX(-10%) translateY(-10%); }
             100% { transform: translateX(10%) translateY(10%); }
         }
-
-        /* Language toggle removed */
 
         .theme-toggle-btn {
             background: rgba(0,0,0,0.15);
@@ -269,7 +286,6 @@
             margin: 24px auto;
             padding: 0 24px;
         }
-        /* rest of the styles unchanged */
         .tab-buttons {
             display: flex;
             flex-wrap: wrap;
@@ -1276,6 +1292,7 @@
 </head>
 <body>
 
+    <!-- SVG Sprite (same as before) -->
     <svg width="0" height="0" style="display:none;">
         <symbol id="icon-calculator" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="10" x2="16" y2="18"/><line x1="12" y1="10" x2="12" y2="18"/><line x1="8" y1="10" x2="8" y2="18"/></symbol>
         <symbol id="icon-exchange" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M19 12l-7 7-7-7"/></symbol>
@@ -1296,10 +1313,12 @@
         <symbol id="icon-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
     </svg>
 
+    <!-- Header toggle button -->
     <button class="header-toggle-tab" onclick="toggleHeader()">
         <svg class="icon" id="headerToggleIcon"><use href="#icon-chevron-up"/></svg>
     </button>
 
+    <!-- Header Bar -->
     <div class="header-bar">
         <h2>
             <img src="Logo.jpg" class="shop-logo" alt="Logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NSIgaGVpZ2h0PSI2NSI+PHBhdGggZD0iTTMyIDRjMTUuNCAwIDI4IDEyLjYgMjggMjhTMzcuNCA2MCAzMiA2MCA0IDQ3LjQgNCAzMiAxNi42IDQgMzIgNHptMCA1MmMxMy4zIDAgMjQtMTAuNyAyNC0yNFMyNS4zIDggMTIgOCAwIDE4LjcgMCAzMHMxMC43IDI0IDI0IDI0eiIgZmlsbD0iI2ZmZiIvPjwvc3ZnPg==">
@@ -1315,7 +1334,6 @@
             <button class="theme-toggle-btn" onclick="randomizeTheme()" title="Change Theme">
                 <svg class="icon"><use href="#icon-palette"/></svg>
             </button>
-            <!-- Language toggle removed -->
             <div id="cloudSyncStatus" class="sync-status idle" title="Cloud Sync Active">
                 <svg class="icon sync-icon-svg" id="cloudIcon" style="width:24px;height:24px;"><use href="#icon-cloud"/></svg>
             </div>
@@ -1323,7 +1341,6 @@
                 <div id="todayDate" style="font-size:13px; line-height:1.6; font-weight:600; background:rgba(255,255,255,0.12); padding:4px 12px; border-radius:20px; display:inline-block; margin-bottom:4px;"></div>
                 <div style="margin-top: 5px;"><span>24 Carat:</span> <span id="liveGoldPrice24ct" class="live-price">--</span></div>
                 <div style="margin-top: 5px;"><span>22 Carat:</span> <span id="liveGoldPrice22ct" class="live-price">--</span></div>
-                <!-- Live price button removed -->
             </div>
         </div>
     </div>
@@ -1347,6 +1364,7 @@
             <button class="tab-button" onclick="openTab('history')"><svg class="icon"><use href="#icon-history"/></svg><span>Bill History</span></button>
         </div>
 
+        <!-- ======================== PROFIT TAB ======================== -->
         <div id="profit" class="tab-pane active">
             <div class="card">
                 <h3><span>⭐ Buy-Sell Calculator</span></h3>
@@ -1390,6 +1408,7 @@
             </div>
         </div>
 
+        <!-- ======================== OLD TO NEW ======================== -->
         <div id="oldToNew" class="tab-pane">
             <div class="card">
                 <h3><svg class="icon"><use href="#icon-recycle"/></svg> <span>Old Gold to New Jewelry</span></h3>
@@ -1723,10 +1742,10 @@
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
 
+        <!-- ======================== HISTORY ======================== -->
         <div id="history" class="tab-pane">
             <div class="card">
                 <h3>📜 Saved Bill List</h3>
@@ -1758,7 +1777,7 @@
     <div id="toast">Message here...</div>
 
     <script>
-        // --- I18N Translation System (Only English) ---
+        // ---------- Translation (English only) ----------
         const translations = {
             en: {
                 shopName: "Soleman Jewellers",
@@ -1937,22 +1956,187 @@
             }
         };
 
-        let currentLang = 'en'; // Always English
+        let currentLang = 'en';
 
         function t(key) {
             return (translations.en && translations.en[key]) ? translations.en[key] : key;
         }
 
-        // Remove switchLang function - no longer needed
-        // We keep only the translation function
+        // ---------- Helper functions ----------
+        const $ = (selector) => document.querySelector(selector);
+        const getVal = (id) => parseFloat($(`#${id}`).value) || 0;
+        const getStr = (id) => $(`#${id}`).value.trim() || 'N/A';
+        const toFixedTrim = (n, d = 2) => parseFloat(n.toFixed(d));
+        const GRAMS_TO_ANA_RATE = 16 / 11.664;
 
-        // ============================================================
-        //  DATE DISPLAY (ENGLISH + BENGALI NUMERIC FORMAT) - keeping as is
-        // ============================================================
+        let otn_calculationResult = {};
+        let currentExchangeMode = 'general';
+        let currentSilverMode = 'general';
 
+        function getLocale() { return 'en-IN'; }
+
+        function gramsToAnaString(weightInGrams) {
+            const totalAna = weightInGrams * GRAMS_TO_ANA_RATE;
+            return `${totalAna.toFixed(3)} Ana`;
+        }
+
+        function animateValue(obj, start, end, duration, prefix = '₹ ') {
+            if (!obj) return;
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                obj.textContent = `${prefix}${Math.floor(progress * (end - start) + start).toLocaleString('en-IN')}`;
+                if (progress < 1) { window.requestAnimationFrame(step); }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        let syncStateTimeout;
+
+        function updateSyncUI(state) {
+            const syncStatus = document.getElementById('cloudSyncStatus');
+            const cloudIcon = document.getElementById('cloudIcon');
+            if (!syncStatus || !cloudIcon) return;
+            clearTimeout(syncStateTimeout);
+
+            if (state === 'saving') {
+                syncStatus.className = 'sync-status saving';
+                cloudIcon.innerHTML = '<use href="#icon-cloud"/>';
+                syncStatus.title = t('syncSaving');
+            } else if (state === 'saved') {
+                syncStatus.className = 'sync-status saved';
+                cloudIcon.innerHTML = '<use href="#icon-cloud-done"/>';
+                syncStatus.title = t('syncSaved');
+                syncStateTimeout = setTimeout(() => {
+                    syncStatus.className = 'sync-status idle';
+                    cloudIcon.innerHTML = '<use href="#icon-cloud"/>';
+                    syncStatus.title = t('syncIdle');
+                }, 3000);
+            } else if (state === 'error') {
+                syncStatus.className = 'sync-status error';
+                cloudIcon.innerHTML = '<use href="#icon-cloud"/>';
+                syncStatus.title = t('syncError');
+                syncStateTimeout = setTimeout(() => {
+                    syncStatus.className = 'sync-status idle';
+                }, 5000);
+            }
+        }
+
+        function showToast(msg) {
+            const ts = document.getElementById("toast");
+            ts.innerText = msg;
+            ts.className = "show";
+            setTimeout(() => ts.className = ts.className.replace("show", ""), 3000);
+        }
+
+        function customConfirm(msg, onYes) {
+            const overlay = document.createElement('div');
+            overlay.style.cssText =
+                'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
+            const box = document.createElement('div');
+            box.style.cssText =
+                'background:#fff;padding:24px;border-radius:12px;text-align:center;min-width:300px;box-shadow:0 10px 25px rgba(0,0,0,0.2);animation:modalSlide 0.3s ease;';
+            box.innerHTML = `
+                    <h4 style="margin-top:0;color:#1e293b;margin-bottom:16px;">Confirm</h4>
+                    <p style="margin-bottom:24px;color:#475569;">${msg}</p>
+                    <div style="display:flex;gap:12px;justify-content:center;">
+                        <button id="btnYes" style="padding:10px 20px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">${t('yes')}</button>
+                        <button id="btnNo" style="padding:10px 20px;background:#e2e8f0;color:#475569;border:none;border-radius:6px;cursor:pointer;font-weight:600;">${t('no')}</button>
+                    </div>
+                `;
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+            document.getElementById('btnYes').onclick = () => { document.body.removeChild(overlay);
+                onYes(); };
+            document.getElementById('btnNo').onclick = () => { document.body.removeChild(overlay); };
+        }
+
+        function showProgress(id) {
+            const progress = $(`#${id}`);
+            if (!progress) return;
+            progress.style.display = 'block';
+            const fill = progress.querySelector('.progress-fill');
+            fill.style.width = '0%';
+            setTimeout(() => { fill.style.width = '100%'; }, 100);
+            setTimeout(() => { progress.style.display = 'none'; }, 2000);
+        }
+
+        function openTab(tabName) {
+            document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            $(`#${tabName}`).classList.add('active');
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                if (btn.textContent.trim().toLowerCase().includes(tabName)) btn.classList.add('active');
+            });
+            if (tabName === 'history') {
+                displayBillHistory();
+            }
+        }
+
+        // ---------- HEADER TOGGLE ----------
+        function toggleHeader() {
+            if (window.innerWidth > 768) return;
+            const header = document.querySelector('.header-bar');
+            const iconUse = document.querySelector('#headerToggleIcon use');
+            header.classList.toggle('hidden-header');
+            if (header.classList.contains('hidden-header')) {
+                iconUse.setAttribute('href', '#icon-chevron-down');
+                localStorage.setItem('solemanHeaderHidden', 'true');
+            } else {
+                iconUse.setAttribute('href', '#icon-chevron-up');
+                localStorage.setItem('solemanHeaderHidden', 'false');
+            }
+        }
+
+        // ---------- THEME ----------
+        const appThemes = [
+            { '--primary-color': '#0ea5e9', '--primary-dark': '#0284c7', '--background-light': '#f0f9ff',
+                '--background-gradient': 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
+                '--gradient-glow': 'linear-gradient(45deg, #0ea5e9, #3b82f6, #06b6d4)',
+                '--bg-glow-1': 'rgba(14, 165, 233, 0.15)', '--bg-glow-2': 'rgba(59, 130, 246, 0.15)' },
+            { '--primary-color': '#10b981', '--primary-dark': '#059669', '--background-light': '#ecfdf5',
+                '--background-gradient': 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
+                '--gradient-glow': 'linear-gradient(45deg, #10b981, #34d399, #059669)',
+                '--bg-glow-1': 'rgba(16, 185, 129, 0.15)', '--bg-glow-2': 'rgba(52, 211, 153, 0.15)' },
+            { '--primary-color': '#f43f5e', '--primary-dark': '#e11d48', '--background-light': '#fff1f2',
+                '--background-gradient': 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
+                '--gradient-glow': 'linear-gradient(45deg, #f43f5e, #fb7185, #e11d48)',
+                '--bg-glow-1': 'rgba(244, 63, 94, 0.15)', '--bg-glow-2': 'rgba(251, 113, 133, 0.15)' },
+            { '--primary-color': '#8b5cf6', '--primary-dark': '#7c3aed', '--background-light': '#f5f3ff',
+                '--background-gradient': 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
+                '--gradient-glow': 'linear-gradient(45deg, #8b5cf6, #a78bfa, #7c3aed)',
+                '--bg-glow-1': 'rgba(139, 92, 246, 0.15)', '--bg-glow-2': 'rgba(167, 139, 250, 0.15)' },
+            { '--primary-color': '#f59e0b', '--primary-dark': '#d97706', '--background-light': '#fffbeb',
+                '--background-gradient': 'linear-gradient(135deg, #fffbeb, #fef3c7)',
+                '--gradient-glow': 'linear-gradient(45deg, #f59e0b, #fbbf24, #d97706)',
+                '--bg-glow-1': 'rgba(245, 158, 11, 0.15)', '--bg-glow-2': 'rgba(251, 191, 36, 0.15)' }
+        ];
+
+        let currentThemeIndex = parseInt(localStorage.getItem('solemanThemeIndex')) || 0;
+
+        function applyTheme(index) {
+            const theme = appThemes[index];
+            const root = document.documentElement;
+            for (const key in theme) {
+                root.style.setProperty(key, theme[key]);
+            }
+        }
+
+        function randomizeTheme() {
+            let newIndex = currentThemeIndex;
+            while (newIndex === currentThemeIndex) {
+                newIndex = Math.floor(Math.random() * appThemes.length);
+            }
+            currentThemeIndex = newIndex;
+            localStorage.setItem('solemanThemeIndex', currentThemeIndex);
+            applyTheme(currentThemeIndex);
+        }
+        applyTheme(currentThemeIndex);
+
+        // ---------- DATE DISPLAY ----------
         function updateDateDisplay() {
             const today = new Date();
-
             const dd = String(today.getDate()).padStart(2, '0');
             const mm = String(today.getMonth() + 1).padStart(2, '0');
             const yy = String(today.getFullYear()).slice(-2);
@@ -1966,7 +2150,6 @@
                 const d = targetDate.getDate();
                 const m = targetDate.getMonth() + 1;
                 const y = targetDate.getFullYear();
-
                 const transitions = {
                     1: { day: 15, prev: "পৌষ", curr: "মাঘ" },
                     2: { day: 14, prev: "মাঘ", curr: "ফাল্গুন" },
@@ -1981,20 +2164,17 @@
                     11: { day: 17, prev: "কার্তিক", curr: "অগ্রহায়ণ" },
                     12: { day: 16, prev: "অগ্রহায়ণ", curr: "পৌষ" }
                 };
-
                 if (y === 2026) {
                     transitions[7].day = 18;
                     transitions[10].day = 19;
                     transitions[11].day = 18;
                     transitions[12].day = 17;
                 }
-
                 const trans = transitions[m];
                 let benYear = y - 593;
                 if (m < 4 || (m === 4 && d < trans.day)) {
                     benYear -= 1;
                 }
-
                 let benMonth, benDate;
                 if (d >= trans.day) {
                     benMonth = trans.curr;
@@ -2005,7 +2185,6 @@
                     let prevY = y;
                     if (prevM === 0) { prevM = 12;
                         prevY--; }
-
                     let prevTransDay = transitions[prevM].day;
                     if (prevY === 2026) {
                         if (prevM === 7) prevTransDay = 18;
@@ -2013,17 +2192,14 @@
                         if (prevM === 11) prevTransDay = 18;
                         if (prevM === 12) prevTransDay = 17;
                     }
-
                     const prevTransDate = new Date(prevY, prevM - 1, prevTransDay);
                     prevTransDate.setHours(0, 0, 0, 0);
                     const currentMidnight = new Date(y, m - 1, d);
                     currentMidnight.setHours(0, 0, 0, 0);
-
                     const diffTime = currentMidnight - prevTransDate;
                     const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
                     benDate = diffDays + 1;
                 }
-
                 const convertToBengaliDigits = (num) => String(num).replace(/\d/g, d => '০১২৩৪৫৬৭৮৯' [d]);
                 return {
                     day: benDate,
@@ -2072,261 +2248,73 @@
             }
         }
 
-        setInterval(updateDateDisplay, 60000);
-        document.addEventListener('DOMContentLoaded', () => {
-            updateDateDisplay();
-        });
+        // ---------- FIREBASE READ / WRITE ----------
+        let serverSaveDebounceTimer;
 
-        // --- Theme Randomizer System (unchanged) ---
-        const appThemes = [
-            { '--primary-color': '#0ea5e9', '--primary-dark': '#0284c7', '--background-light': '#f0f9ff',
-                '--background-gradient': 'linear-gradient(135deg, #f0f9ff, #e0f2fe)',
-                '--gradient-glow': 'linear-gradient(45deg, #0ea5e9, #3b82f6, #06b6d4)',
-                '--bg-glow-1': 'rgba(14, 165, 233, 0.15)', '--bg-glow-2': 'rgba(59, 130, 246, 0.15)' },
-            { '--primary-color': '#10b981', '--primary-dark': '#059669', '--background-light': '#ecfdf5',
-                '--background-gradient': 'linear-gradient(135deg, #ecfdf5, #d1fae5)',
-                '--gradient-glow': 'linear-gradient(45deg, #10b981, #34d399, #059669)',
-                '--bg-glow-1': 'rgba(16, 185, 129, 0.15)', '--bg-glow-2': 'rgba(52, 211, 153, 0.15)' },
-            { '--primary-color': '#f43f5e', '--primary-dark': '#e11d48', '--background-light': '#fff1f2',
-                '--background-gradient': 'linear-gradient(135deg, #fff1f2, #ffe4e6)',
-                '--gradient-glow': 'linear-gradient(45deg, #f43f5e, #fb7185, #e11d48)',
-                '--bg-glow-1': 'rgba(244, 63, 94, 0.15)', '--bg-glow-2': 'rgba(251, 113, 133, 0.15)' },
-            { '--primary-color': '#8b5cf6', '--primary-dark': '#7c3aed', '--background-light': '#f5f3ff',
-                '--background-gradient': 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
-                '--gradient-glow': 'linear-gradient(45deg, #8b5cf6, #a78bfa, #7c3aed)',
-                '--bg-glow-1': 'rgba(139, 92, 246, 0.15)', '--bg-glow-2': 'rgba(167, 139, 250, 0.15)' },
-            { '--primary-color': '#f59e0b', '--primary-dark': '#d97706', '--background-light': '#fffbeb',
-                '--background-gradient': 'linear-gradient(135deg, #fffbeb, #fef3c7)',
-                '--gradient-glow': 'linear-gradient(45deg, #f59e0b, #fbbf24, #d97706)',
-                '--bg-glow-1': 'rgba(245, 158, 11, 0.15)', '--bg-glow-2': 'rgba(251, 191, 36, 0.15)' }
-        ];
-
-        let currentThemeIndex = parseInt(localStorage.getItem('solemanThemeIndex')) || 0;
-
-        function applyTheme(index) {
-            const theme = appThemes[index];
-            const root = document.documentElement;
-            for (const key in theme) {
-                root.style.setProperty(key, theme[key]);
-            }
-        }
-
-        function randomizeTheme() {
-            let newIndex = currentThemeIndex;
-            while (newIndex === currentThemeIndex) {
-                newIndex = Math.floor(Math.random() * appThemes.length);
-            }
-            currentThemeIndex = newIndex;
-            localStorage.setItem('solemanThemeIndex', currentThemeIndex);
-            applyTheme(currentThemeIndex);
-        }
-        applyTheme(currentThemeIndex);
-
-        const $ = (selector) => document.querySelector(selector);
-        const getVal = (id) => parseFloat($(`#${id}`).value) || 0;
-        const getStr = (id) => $(`#${id}`).value.trim() || 'N/A';
-        const toFixedTrim = (n, d = 2) => parseFloat(n.toFixed(d));
-        const GRAMS_TO_ANA_RATE = 16 / 11.664;
-        let otn_calculationResult = {};
-        let currentExchangeMode = 'general';
-        let currentSilverMode = 'general';
-
-        function getLocale() {
-            return 'en-IN';
-        }
-
-        function gramsToAnaString(weightInGrams) {
-            const totalAna = weightInGrams * GRAMS_TO_ANA_RATE;
-            return `${totalAna.toFixed(3)} Ana`;
-        }
-
-        function animateValue(obj, start, end, duration, prefix = '₹ ') {
-            if (!obj) return;
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                obj.textContent = `${prefix}${Math.floor(progress * (end - start) + start).toLocaleString('en-IN')}`;
-                if (progress < 1) { window.requestAnimationFrame(step); }
-            };
-            window.requestAnimationFrame(step);
-        }
-
-        let syncStateTimeout;
-
-        function updateSyncUI(state) {
-            const syncStatus = document.getElementById('cloudSyncStatus');
-            const cloudIcon = document.getElementById('cloudIcon');
-            if (!syncStatus || !cloudIcon) return;
-
-            clearTimeout(syncStateTimeout);
-
-            if (state === 'saving') {
-                syncStatus.className = 'sync-status saving';
-                cloudIcon.innerHTML = '<use href="#icon-cloud"/>';
-                syncStatus.title = t('syncSaving');
-            } else if (state === 'saved') {
-                syncStatus.className = 'sync-status saved';
-                cloudIcon.innerHTML = '<use href="#icon-cloud-done"/>';
-                syncStatus.title = t('syncSaved');
-
-                syncStateTimeout = setTimeout(() => {
-                    syncStatus.className = 'sync-status idle';
-                    cloudIcon.innerHTML = '<use href="#icon-cloud"/>';
-                    syncStatus.title = t('syncIdle');
-                }, 3000);
-            } else if (state === 'error') {
-                syncStatus.className = 'sync-status error';
-                cloudIcon.innerHTML = '<use href="#icon-cloud"/>';
-                syncStatus.title = t('syncError');
-
-                syncStateTimeout = setTimeout(() => {
-                    syncStatus.className = 'sync-status idle';
-                }, 5000);
-            }
-        }
-
-        function updateAllAnaDisplays() {
-            ['profitWeightInAna', 'newWeightInAna', 'oldWeightInAna', 'newWeightSilverInAna', 'oldWeightSilverInAna',
-                'otn_OldWeightInAna', 'otn_NewWeightInAna'
-            ].forEach(id => {
-                const input = document.getElementById(id);
-                if (input) {
-                    const event = new Event('input');
-                    input.dispatchEvent(event);
+        function loadFromServer() {
+            database.ref('/').once('value').then(snapshot => {
+                const data = snapshot.val() || {};
+                if (data.bills) localStorage.setItem('solemanJewellersBills', data.bills);
+                if (data.loans) localStorage.setItem('soleman_loan_accounts', data.loans);
+                if (data.settings) localStorage.setItem('solemanJewellersSettings', data.settings);
+                if (data.goldPrice) {
+                    document.getElementById('basePrice24ct').value = data.goldPrice;
+                    document.getElementById('otn_BasePrice24ct').value = data.goldPrice;
+                    document.getElementById('newPrice11').value = currentExchangeMode === 'nakmachi' ? data.goldPrice * 0.65 : data.goldPrice;
+                    fetchLivePrice();
                 }
-            });
-        }
+                if (data.oldGoldPriceGeneral) document.getElementById('oldPrice11').value = data.oldGoldPriceGeneral;
+                if (data.oldGoldPriceNakmachi) document.getElementById('oldPrice11').value = data.oldGoldPriceNakmachi;
+                if (data.newSilverPrice) document.getElementById('newPrice11Silver').value = data.newSilverPrice;
+                if (data.oldSilverPrice) document.getElementById('oldPrice11Silver').value = data.oldSilverPrice;
 
-        function updateAllDeductionDisplays() {
-            ['purity', 'puritySilver'].forEach(id => {
-                const input = document.getElementById(id);
-                if (input) {
-                    input.dispatchEvent(new Event('input'));
-                }
-            });
-        }
-
-        function showToast(msg) {
-            const ts = document.getElementById("toast");
-            ts.innerText = msg;
-            ts.className = "show";
-            setTimeout(() => ts.className = ts.className.replace("show", ""), 3000);
-        }
-
-        function customConfirm(msg, onYes) {
-            const overlay = document.createElement('div');
-            overlay.style.cssText =
-                'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);';
-            const box = document.createElement('div');
-            box.style.cssText =
-                'background:#fff;padding:24px;border-radius:12px;text-align:center;min-width:300px;box-shadow:0 10px 25px rgba(0,0,0,0.2);animation:modalSlide 0.3s ease;';
-            box.innerHTML = `
-                    <h4 style="margin-top:0;color:#1e293b;margin-bottom:16px;">Confirm</h4>
-                    <p style="margin-bottom:24px;color:#475569;">${msg}</p>
-                    <div style="display:flex;gap:12px;justify-content:center;">
-                        <button id="btnYes" style="padding:10px 20px;background:#ef4444;color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:600;">${t('yes')}</button>
-                        <button id="btnNo" style="padding:10px 20px;background:#e2e8f0;color:#475569;border:none;border-radius:6px;cursor:pointer;font-weight:600;">${t('no')}</button>
-                    </div>
-                `;
-            overlay.appendChild(box);
-            document.body.appendChild(overlay);
-            document.getElementById('btnYes').onclick = () => { document.body.removeChild(overlay);
-                onYes(); };
-            document.getElementById('btnNo').onclick = () => { document.body.removeChild(overlay); };
-        }
-
-        function showProgress(id) {
-            const progress = $(`#${id}`);
-            if (!progress) return;
-            progress.style.display = 'block';
-            const fill = progress.querySelector('.progress-fill');
-            fill.style.width = '0%';
-            setTimeout(() => { fill.style.width = '100%'; }, 100);
-            setTimeout(() => { progress.style.display = 'none'; }, 2000);
-        }
-
-        function openTab(tabName) {
-            document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-            $(`#${tabName}`).classList.add('active');
-            $(`button[onclick="openTab('${tabName}')"]`).classList.add('active');
-            if (tabName === 'history') {
                 displayBillHistory();
-            }
+                gl_loadAccountList();
+                calculateProfit();
+                calculateExchange(false);
+                calculateSilverExchange(false);
+                otn_calculateOldToNew();
+            }).catch(err => {
+                console.warn('Firebase read error:', err);
+            });
         }
 
-        // ========== HEADER TOGGLE (only on mobile) ==========
-        function toggleHeader() {
-            // Only work on mobile (width <= 768px)
-            if (window.innerWidth > 768) {
-                return;
-            }
-            const header = document.querySelector('.header-bar');
-            const iconUse = document.querySelector('#headerToggleIcon use');
-            header.classList.toggle('hidden-header');
-
-            if (header.classList.contains('hidden-header')) {
-                iconUse.setAttribute('href', '#icon-chevron-down');
-                localStorage.setItem('solemanHeaderHidden', 'true');
-            } else {
-                iconUse.setAttribute('href', '#icon-chevron-up');
-                localStorage.setItem('solemanHeaderHidden', 'false');
-            }
+        function saveToServer() {
+            clearTimeout(serverSaveDebounceTimer);
+            updateSyncUI('saving');
+            serverSaveDebounceTimer = setTimeout(() => {
+                const allData = {
+                    bills: localStorage.getItem('solemanJewellersBills'),
+                    loans: localStorage.getItem('soleman_loan_accounts'),
+                    settings: localStorage.getItem('solemanJewellersSettings'),
+                    goldPrice: document.getElementById('basePrice24ct').value,
+                    oldGoldPriceGeneral: document.getElementById('oldPrice11').value,
+                    oldGoldPriceNakmachi: document.getElementById('oldPrice11').value,
+                    newSilverPrice: document.getElementById('newPrice11Silver').value,
+                    oldSilverPrice: document.getElementById('oldPrice11Silver').value
+                };
+                database.ref('/').update(allData)
+                    .then(() => {
+                        console.log('Data saved to Firebase');
+                        updateSyncUI('saved');
+                    })
+                    .catch(err => {
+                        console.warn('Firebase save error:', err);
+                        updateSyncUI('error');
+                    });
+            }, 1000);
         }
 
-        function setExchangeMode(mode) {
-            currentExchangeMode = mode;
-            const genBtn = document.getElementById('mode-general');
-            const nakBtn = document.getElementById('mode-nakmachi');
-
-            if (mode === 'general') {
-                genBtn.classList.add('active');
-                nakBtn.classList.remove('active');
-                const price24ct = getVal('basePrice24ct') || 140000;
-                document.getElementById('newPrice11').value = price24ct;
-                document.getElementById('labourType').value = 'percent';
-                document.getElementById('labourValue').value = 12;
-                document.getElementById('oldPrice11').value = 138000;
-                document.getElementById('purity').value = 65;
-            } else {
-                nakBtn.classList.add('active');
-                genBtn.classList.remove('active');
-                const price24ct = getVal('basePrice24ct') || 140000;
-                document.getElementById('newPrice11').value = price24ct * 0.65;
-                document.getElementById('labourType').value = 'percent';
-                document.getElementById('labourValue').value = 15;
-                document.getElementById('oldPrice11').value = 138000;
-                document.getElementById('purity').value = 35;
+        // Override localStorage.setItem to trigger Firebase save
+        const originalSetItem = Storage.prototype.setItem;
+        Storage.prototype.setItem = function(key, value) {
+            originalSetItem.apply(this, arguments);
+            if (key.includes('soleman')) {
+                saveToServer();
             }
-            calculateExchange(false);
-            updateAllAnaDisplays();
-            updateAllDeductionDisplays();
-            showToast(`${mode === 'general' ? t('goldModeGen') : t('goldModeNak')} Mode Activated`);
-        }
+        };
 
-        function setSilverQuick(mode) {
-            currentSilverMode = mode;
-            const genBtn = document.getElementById('silver-mode-general');
-            const sellBtn = document.getElementById('silver-mode-sell');
-
-            if (mode === 'general') {
-                genBtn.classList.add('active');
-                sellBtn.classList.remove('active');
-                document.getElementById('puritySilver').value = 65;
-                document.getElementById('oldPrice11Silver').value = 1700;
-            } else {
-                sellBtn.classList.add('active');
-                genBtn.classList.remove('active');
-                document.getElementById('puritySilver').value = 30;
-                document.getElementById('oldPrice11Silver').value = 1800;
-            }
-            calculateSilverExchange(false);
-            updateAllAnaDisplays();
-            updateAllDeductionDisplays();
-            showToast(`${mode === 'general' ? t('silverModeGen') : t('silverModeSell')} Mode Activated`);
-        }
-
+        // ---------- SETTINGS ----------
         function saveSettings() {
             localStorage.setItem('solemanJewellersSettings', JSON.stringify({
                 basePrice24ct: getVal('basePrice24ct'),
@@ -2350,6 +2338,7 @@
             }
         }
 
+        // ---------- LIVE PRICE & TICKER ----------
         function fetchLivePrice() {
             const livePriceDisplay24ct = $('#liveGoldPrice24ct');
             const livePriceDisplay22ct = $('#liveGoldPrice22ct');
@@ -2362,7 +2351,6 @@
                 const currentPrice22ct = currentPrice24ct * 0.92;
                 animateValue(livePriceDisplay24ct, currentPrice24ct - 500, currentPrice24ct, 1500);
                 animateValue(livePriceDisplay22ct, currentPrice22ct - 500, currentPrice22ct, 1500);
-
                 p24 = `₹ ${currentPrice24ct.toLocaleString('en-IN')}`;
                 p22 = `₹ ${Math.floor(currentPrice22ct).toLocaleString('en-IN')}`;
             } else {
@@ -2377,6 +2365,7 @@
             }
         }
 
+        // ---------- PROFIT CALC ----------
         function calculateProfit(returnDetails = false) {
             showProgress('profitProgress');
             const details = {
@@ -2423,6 +2412,37 @@
                         </div>
                     </div>`;
             saveSettings();
+        }
+
+        // ---------- EXCHANGE ----------
+        function setExchangeMode(mode) {
+            currentExchangeMode = mode;
+            const genBtn = document.getElementById('mode-general');
+            const nakBtn = document.getElementById('mode-nakmachi');
+
+            if (mode === 'general') {
+                genBtn.classList.add('active');
+                nakBtn.classList.remove('active');
+                const price24ct = getVal('basePrice24ct') || 140000;
+                document.getElementById('newPrice11').value = price24ct;
+                document.getElementById('labourType').value = 'percent';
+                document.getElementById('labourValue').value = 12;
+                document.getElementById('oldPrice11').value = 138000;
+                document.getElementById('purity').value = 65;
+            } else {
+                nakBtn.classList.add('active');
+                genBtn.classList.remove('active');
+                const price24ct = getVal('basePrice24ct') || 140000;
+                document.getElementById('newPrice11').value = price24ct * 0.65;
+                document.getElementById('labourType').value = 'percent';
+                document.getElementById('labourValue').value = 15;
+                document.getElementById('oldPrice11').value = 138000;
+                document.getElementById('purity').value = 35;
+            }
+            calculateExchange(false);
+            updateAllAnaDisplays();
+            updateAllDeductionDisplays();
+            showToast(`${mode === 'general' ? t('goldModeGen') : t('goldModeNak')} Mode Activated`);
         }
 
         function calculateExchange(returnDetails = false) {
@@ -2472,6 +2492,56 @@
             }
             $('#exchangeOutput').innerHTML = out;
             saveSettings();
+        }
+
+        function resetExchange() {
+            $('#exchangeCustomerName').value = '';
+            $('#exchangeCustomerPhone').value = '';
+            $('#newWeight').value = '0';
+            const price24ct = getVal('basePrice24ct') || 140000;
+
+            if (currentExchangeMode === 'nakmachi') {
+                $('#newPrice11').value = price24ct * 0.65;
+                $('#labourType').value = 'percent';
+                $('#labourValue').value = '15';
+                $('#oldPrice11').value = '138000';
+                $('#purity').value = '35';
+            } else {
+                $('#newPrice11').value = price24ct;
+                $('#labourType').value = 'percent';
+                $('#labourValue').value = '12';
+                $('#oldPrice11').value = '138000';
+                $('#purity').value = '65';
+            }
+
+            $('#oldWeight').value = '0';
+            $('#includeGstExchange').checked = true;
+            calculateExchange(false);
+            updateAllAnaDisplays();
+            updateAllDeductionDisplays();
+        }
+
+        // ---------- SILVER EXCHANGE ----------
+        function setSilverQuick(mode) {
+            currentSilverMode = mode;
+            const genBtn = document.getElementById('silver-mode-general');
+            const sellBtn = document.getElementById('silver-mode-sell');
+
+            if (mode === 'general') {
+                genBtn.classList.add('active');
+                sellBtn.classList.remove('active');
+                document.getElementById('puritySilver').value = 65;
+                document.getElementById('oldPrice11Silver').value = 1700;
+            } else {
+                sellBtn.classList.add('active');
+                genBtn.classList.remove('active');
+                document.getElementById('puritySilver').value = 30;
+                document.getElementById('oldPrice11Silver').value = 1800;
+            }
+            calculateSilverExchange(false);
+            updateAllAnaDisplays();
+            updateAllDeductionDisplays();
+            showToast(`${mode === 'general' ? t('silverModeGen') : t('silverModeSell')} Mode Activated`);
         }
 
         function calculateSilverExchange(returnDetails = false) {
@@ -2524,390 +2594,30 @@
             saveSettings();
         }
 
-        function saveAndPrintExchangeBill() {
-            const details = calculateExchange(true);
-            if (!details || (details.newWeight <= 0 && details.oldWeight <= 0)) {
-                showToast(t('toastNeedCalc'));
-                return;
-            }
-            details.id = Date.now();
-            details.date = new Date().toISOString();
-            details.billType = 'exchange';
-            let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
-            bills.unshift(details);
-            localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
-            showToast(t('toastSaved'));
-            const printWindow = window.open('', '', 'height=800,width=800');
-            const today = new Date(details.date).toLocaleDateString(getLocale(), { year: 'numeric', month: 'long',
-                day: 'numeric' });
-            const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
+        function resetSilverExchange() {
+            $('#silverCustomerName').value = '';
+            $('#silverCustomerPhone').value = '';
+            $('#newWeightSilver').value = '0';
+            $('#labourTypeSilver').value = 'percent';
+            $('#labourValueSilver').value = '12';
+            $('#oldWeightSilver').value = '0';
 
-            let title = details.exchangeMode === 'nakmachi' ? 'Nakmachi Exchange' : t('exchangeBill');
-
-            let balanceText = '';
-            if (details.balance > 0.005) {
-                balanceText =
-                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('custPay')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${details.finalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
-            } else if (details.balance < -0.005) {
-                balanceText =
-                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('shopReturn')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${Math.abs(details.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+            if (currentSilverMode === 'sell') {
+                $('#puritySilver').value = '30';
+                $('#oldPrice11Silver').value = '1800';
             } else {
-                balanceText =
-                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('balance')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹0.00</td></tr>`;
+                $('#puritySilver').value = '65';
+                $('#oldPrice11Silver').value = '1700';
             }
+            $('#newPrice11Silver').value = '2050';
 
-            let makingDisplay = '';
-            if (details.labourType === 'pergram') makingDisplay = `@ ₹${details.labourValue}/${t('gram')}`;
-            else if (details.labourType === 'percent') makingDisplay = `${details.labourValue}%`;
-            else makingDisplay = t('fixed');
-
-            const billContent = `
-                    <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
-                        <div style="position: relative; text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
-                            <div style="position: absolute; left: 0; top: 0; text-align: left;">
-                                <img src="hallmark_logo.jpg" alt="Hallmark" style="height: 55px; border-radius: 4px;">
-                                <div style="font-size: 11px; font-weight: bold; color: #333; margin-top: 5px; line-height: 1.3;">
-                                    Certified Hallmark<br>Jewellery Point
-                                </div>
-                            </div>
-                            <h2 style="margin: 0; font-size: 28px; color: #0284c7;">${t('shopNamePrint')}</h2>
-                            <div style="display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 600; margin-top: 5px; color: #333;">
-                                Certified Hallmark Jewellery Point <img src="hallmark_logo.jpg" style="height: 16px; margin-left: 6px;">
-                            </div>
-                            <p style="margin: 5px 0;">${t('footerAddr')}</p>
-                            <p style="margin: 5px 0; font-size: 12px;">GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
-                            <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">${title}</h3>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                            <div><strong>${t('custName')}:</strong> ${details.customerName}</div>
-                            <div><strong>${t('dateStr')}:</strong> ${today}</div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                            <div><strong>${t('phone')}:</strong> ${details.customerPhone}</div>
-                            <div><strong>${t('invoiceNo')}:</strong> ${invoiceId}</div>
-                        </div>
-
-                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                            <thead>
-                                <tr style="background-color: #f1f5f9;">
-                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">${t('detailsLabel')}</th>
-                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('weightG')}</th>
-                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('rateLabel')}</th>
-                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('totalLabel')}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">${t('newJewelry')}</td></tr>
-                                <tr><td>${t('goldValue')}</td><td style="text-align: right;">${details.newWeight.toFixed(3)} ${t('gram')}</td><td style="text-align: right;">${(details.newPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${details.baseNewValue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="2">${t('making')} (${makingDisplay})</td><td style="text-align: right;">-</td><td style="text-align: right;">${details.labourAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="3" style="text-align: right; font-weight:bold;">${t('newJewelryTotal')}:</td><td style="text-align: right; font-weight:bold;">${details.newGross.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-
-                                <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">${t('oldJewelry')}</td></tr>
-                                <tr><td>${t('goldValue')}</td><td style="text-align: right;">${details.oldWeight.toFixed(3)} ${t('gram')}</td><td style="text-align: right;">${(details.oldPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${((details.oldPrice10g / 10) * details.oldWeight).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="2">${t('cutOff')} (${parseFloat((100 - details.purity).toFixed(2))}%)</td><td style="text-align: right;">-</td><td style="text-align: right;">- ${(((details.oldPrice10g / 10) * details.oldWeight) - details.oldNet).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="3" style="text-align: right; font-weight:bold;">${t('oldJewelryTotal')} (${details.purity}%):</td><td style="text-align: right; font-weight:bold;">${details.oldNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-
-                                ${(details.includeGst && details.balance > 0) ? `
-                                <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">>${t('subtotal')}:</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="3" style="text-align: right;">${t('gst')} (${details.gstPercent}%):</td><td style="text-align: right;">${details.gstOnPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                ` : ''}
-                            </tbody>
-                            <tfoot>
-                                <tr style="border-top: 2px solid #94a3b8;">
-                                    ${balanceText}
-                                </tr>
-                            </tfoot>
-                        </table>
-                         <div style="margin-top: 30px; text-align: right;">
-                            <p style="margin: 0;">--------------------------</p>
-                            <p style="margin: 5px 0;">${t('signature')}</p>
-                        </div>
-                    </div>
-                `;
-            printWindow.document.write('<html><head><title>Exchange Bill</title>');
-            printWindow.document.write(
-                '<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>'
-                );
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(billContent);
-            printWindow.document.close();
-            setTimeout(() => { printWindow.print(); }, 500);
+            $('#includeGstExchangeSilver').checked = true;
+            calculateSilverExchange(false);
+            updateAllAnaDisplays();
+            updateAllDeductionDisplays();
         }
 
-        function saveAndPrintSilverExchangeBill() {
-            const details = calculateSilverExchange(true);
-            if (!details || (details.newWeight <= 0 && details.oldWeight <= 0)) {
-                showToast(t('toastNeedCalc'));
-                return;
-            }
-            details.id = Date.now();
-            details.date = new Date().toISOString();
-            details.billType = 'silverExchange';
-            let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
-            bills.unshift(details);
-            localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
-            showToast(t('toastSaved'));
-            const printWindow = window.open('', '', 'height=800,width=800');
-            const today = new Date(details.date).toLocaleDateString(getLocale(), { year: 'numeric', month: 'long',
-                day: 'numeric' });
-            const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
-
-            let balanceText = '';
-            if (details.balance > 0.005) {
-                balanceText =
-                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('custPay')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${details.finalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
-            } else if (details.balance < -0.005) {
-                balanceText =
-                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('shopReturn')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${Math.abs(details.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
-            } else {
-                balanceText =
-                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('balance')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹0.00</td></tr>`;
-            }
-
-            let makingDisplay = '';
-            if (details.labourType === 'pergram') makingDisplay = `@ ₹${details.labourValue}/${t('gram')}`;
-            else if (details.labourType === 'percent') makingDisplay = `${details.labourValue}%`;
-            else makingDisplay = t('fixed');
-
-            const billContent = `
-                    <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
-                        <div style="position: relative; text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
-                            <div style="position: absolute; left: 0; top: 0; text-align: left;">
-                                <img src="hallmark_logo.jpg" alt="Hallmark" style="height: 55px; border-radius: 4px;">
-                                <div style="font-size: 11px; font-weight: bold; color: #333; margin-top: 5px; line-height: 1.3;">
-                                    Certified Hallmark<br>Jewellery Point
-                                </div>
-                            </div>
-                            <h2 style="margin: 0; font-size: 28px; color: #0284c7;">${t('shopNamePrint')}</h2>
-                            <div style="display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 600; margin-top: 5px; color: #333;">
-                                Certified Hallmark Jewellery Point <img src="hallmark_logo.jpg" style="height: 16px; margin-left: 6px;">
-                            </div>
-                            <p style="margin: 5px 0;">${t('footerAddr')}</p>
-                            <p style="margin: 5px 0; font-size: 12px;">GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
-                            <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">${t('silverExBill')}</h3>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                            <div><strong>${t('custName')}:</strong> ${details.customerName}</div>
-                            <div><strong>${t('dateStr')}:</strong> ${today}</div>
-                        </div>
-                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                            <div><strong>${t('phone')}:</strong> ${details.customerPhone}</div>
-                            <div><strong>${t('invoiceNo')}:</strong> ${invoiceId}</div>
-                        </div>
-
-                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                            <thead>
-                                <tr style="background-color: #f1f5f9;">
-                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">${t('detailsLabel')}</th>
-                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('weightG')}</th>
-                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('rateLabel')}</th>
-                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('totalLabel')}</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">${t('newSilver')}</td></tr>
-                                <tr><td>${t('goldValue')}</td><td style="text-align: right;">${details.newWeight.toFixed(3)} ${t('gram')}</td><td style="text-align: right;">${(details.newPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${details.baseNewValue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="2">${t('making')} (${makingDisplay})</td><td style="text-align: right;">-</td><td style="text-align: right;">${details.labourAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="3" style="text-align: right; font-weight:bold;">${t('newJewelryTotal')}:</td><td style="text-align: right; font-weight:bold;">${details.newGross.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-
-                                <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">${t('oldSilver')}</td></tr>
-                                <tr><td>${t('goldValue')}</td><td style="text-align: right;">${details.oldWeight.toFixed(3)} ${t('gram')}</td><td style="text-align: right;">${(details.oldPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${((details.oldPrice10g / 10) * details.oldWeight).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="2">${t('cutOff')} (${parseFloat((100 - details.purity).toFixed(2))}%)</td><td style="text-align: right;">-</td><td style="text-align: right;">- ${(((details.oldPrice10g / 10) * details.oldWeight) - details.oldNet).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="3" style="text-align: right; font-weight:bold;">${t('oldJewelryTotal')} (${details.purity}%):</td><td style="text-align: right; font-weight:bold;">${details.oldNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-
-                                ${(details.includeGst && details.balance > 0) ? `
-                                <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">>${t('subtotal')}:</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                <tr><td colspan="3" style="text-align: right;">${t('gst')} (${details.gstPercent}%):</td><td style="text-align: right;">${details.gstOnPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
-                                ` : ''}
-                            </tbody>
-                            <tfoot>
-                                <tr style="border-top: 2px solid #94a3b8;">
-                                    ${balanceText}
-                                </tr>
-                            </tfoot>
-                        </table>
-                         <div style="margin-top: 30px; text-align: right;">
-                            <p style="margin: 0;">--------------------------</p>
-                            <p style="margin: 5px 0;">${t('signature')}</p>
-                        </div>
-                    </div>
-                `;
-            printWindow.document.write('<html><head><title>Silver Exchange Bill</title>');
-            printWindow.document.write(
-                '<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>'
-                );
-            printWindow.document.write('</head><body>');
-            printWindow.document.write(billContent);
-            printWindow.document.close();
-            setTimeout(() => { printWindow.print(); }, 500);
-        }
-
-        function previewBill() {
-            const calcData = calculateProfit(true);
-            if (!calcData) {
-                showToast(t('toastNeedCalc'));
-                return;
-            }
-            const { details, total } = calcData;
-            const invoiceId = `SJ-PREVIEW`;
-
-            $('#modalTitle').textContent = t('billPreviewTitle');
-            const modalBody = $('#modalBody');
-            let makingDisplay = '';
-            if (details.makingChargeType === 'pergram') makingDisplay = `@ ₹${details.makingChargeValue}/${t('gram')}`;
-            else if (details.makingChargeType === 'percent') makingDisplay = `${details.makingChargeValue}%`;
-            else makingDisplay = t('fixed');
-            modalBody.innerHTML = `
-                    <table class="bill-details-table">
-                        <tr><td>${t('invoiceNo')}:</td><td>${invoiceId}</td></tr>
-                        <tr><td>${t('custName')}:</td><td>${details.customerName}</td></tr>
-                        <tr><td>${t('phone')}:</td><td>${details.customerPhone}</td></tr>
-                        <tr><td>${t('dateStr')}:</td><td>${new Date().toLocaleDateString(getLocale(), {day:'numeric', month:'long', year:'numeric'})}</td></tr>
-                        <tr><td colspan="2"><hr></td></tr>
-                        <tr><td>${t('typeJewelry')}:</td><td>${details.qualityName}</td></tr>
-                        <tr><td>${t('weightLabel')}:</td><td>${details.weightGrams} ${t('gram')}</td></tr>
-                        <tr><td>${t('goldValue')}:</td><td>₹${toFixedTrim(details.totalGoldValue).toLocaleString('en-IN')}</td></tr>
-                        <tr><td>${t('makingLabel')}:</td><td>${makingDisplay}</td></tr>
-                        <tr><td>${t('subtotal')}:</td><td>₹${toFixedTrim(details.totalGoldValue + details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
-                        <tr><td>${t('gst')} (${details.gstPercent}%):</td><td>₹${toFixedTrim(details.gstAmount).toLocaleString('en-IN')}</td></tr>
-                        <tr class="total-row"><td>${t('totalPriceGST')}:</td><td>₹${toFixedTrim(total).toLocaleString('en-IN')}</td></tr>
-                    </table>
-                `;
-            $('#billDetailsModal').style.display = 'flex';
-        }
-
-        function previewExchange() {
-            const details = calculateExchange(true);
-            if (!details) { showToast(t('toastNeedCalc')); return; }
-            $('#modalTitle').textContent = t('billPreviewTitle');
-            const modalBody = $('#modalBody');
-            let balanceRow = '';
-            if (details.balance > 0.005) {
-                balanceRow = `
-                        <tr><td>>${t('subtotal')}:</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
-                        ${details.includeGst ? `<tr><td>${t('gst')} (${details.gstPercent}%):</td><td>₹${details.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
-                        <tr class="total-row"><td>${t('custPay')}:</td><td>₹${details.finalPayable.toLocaleString('en-IN')}</td></tr>
-                    `;
-            } else if (details.balance < -0.005) {
-                balanceRow =
-                    `<tr class="total-row"><td>${t('shopReturn')}:</td><td>₹${toFixedTrim(Math.abs(details.balance)).toLocaleString('en-IN')}</td></tr>`;
-            } else {
-                balanceRow = `<tr class="total-row"><td>${t('balance')}:</td><td>₹0</td></tr>`;
-            }
-            modalBody.innerHTML = `
-                    <table class="bill-details-table">
-                        <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">${t('newJewelry')}</td></tr>
-                        <tr><td>${t('goldValue')}:</td><td>₹${toFixedTrim(details.baseNewValue).toLocaleString('en-IN')}</td></tr>
-                        <tr><td>${t('makingLabel')}:</td><td>₹${details.labourAmount.toLocaleString('en-IN')}</td></tr>
-                        <tr><td><strong>${t('newJewelryTotal')}:</strong></td><td><strong>₹${details.newGross.toLocaleString('en-IN')}</strong></td></tr>
-                        <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
-                        <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">${t('oldJewelry')}</td></tr>
-                        <tr><td>${t('oldJewelryTotal')} (${details.purity}%):</td><td>₹${details.oldNet.toLocaleString('en-IN')}</td></tr>
-                        <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
-                        ${balanceRow}
-                    </table>
-                `;
-            $('#billDetailsModal').style.display = 'flex';
-        }
-
-        function previewSilverExchange() {
-            const details = calculateSilverExchange(true);
-            if (!details) { showToast(t('toastNeedCalc')); return; }
-            $('#modalTitle').textContent = t('billPreviewTitle');
-            const modalBody = $('#modalBody');
-            let balanceRow = '';
-            if (details.balance > 0.005) {
-                balanceRow = `
-                        <tr><td>>${t('subtotal')}:</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
-                        ${details.includeGst ? `<tr><td>${t('gst')} (${details.gstPercent}%):</td><td>₹${details.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
-                        <tr class="total-row"><td>${t('custPay')}:</td><td>₹${details.finalPayable.toLocaleString('en-IN')}</td></tr>
-                    `;
-            } else if (details.balance < -0.005) {
-                balanceRow =
-                    `<tr class="total-row"><td>${t('shopReturn')}:</td><td>₹${toFixedTrim(Math.abs(details.balance)).toLocaleString('en-IN')}</td></tr>`;
-            } else {
-                balanceRow = `<tr class="total-row"><td>${t('balance')}:</td><td>₹0</td></tr>`;
-            }
-            modalBody.innerHTML = `
-                    <table class="bill-details-table">
-                        <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">${t('newSilver')}</td></tr>
-                        <tr><td>${t('goldValue')}:</td><td>₹${toFixedTrim(details.baseNewValue).toLocaleString('en-IN')}</td></tr>
-                        <tr><td>${t('makingLabel')}:</td><td>₹${details.labourAmount.toLocaleString('en-IN')}</td></tr>
-                        <tr><td><strong>${t('newJewelryTotal')}:</strong></td><td><strong>₹${details.newGross.toLocaleString('en-IN')}</strong></td></tr>
-                        <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
-                        <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">${t('oldSilver')}</td></tr>
-                        <tr><td>${t('oldJewelryTotal')} (${details.purity}%):</td><td>₹${details.oldNet.toLocaleString('en-IN')}</td></tr>
-                        <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
-                        ${balanceRow}
-                    </table>
-                `;
-            $('#billDetailsModal').style.display = 'flex';
-        }
-
-        function saveAndPrintBill() {
-            const calcData = calculateProfit(true);
-            if (!calcData) { showToast(t('toastNeedCalc')); return; }
-
-            const { details, total } = calcData;
-            details.total = total;
-            details.id = Date.now();
-            details.date = new Date().toISOString();
-            details.billType = 'profit';
-
-            let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
-            bills.unshift(details);
-            localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
-
-            showToast(t('toastSaved'));
-            const billWindow = window.open('', 'PRINT', 'height=700,width=900');
-            const today = new Date(details.date).toLocaleDateString(getLocale(), { year: 'numeric', month: 'long',
-                day: 'numeric' });
-            const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
-            let makingDisplay = '';
-            if (details.makingChargeType === 'pergram') makingDisplay = `@ ₹${details.makingChargeValue}/${t('gram')}`;
-            else if (details.makingChargeType === 'percent') makingDisplay = `@ ${details.makingChargeValue}%`;
-            else makingDisplay = `@ ${t('fixed')} ₹${details.makingChargeValue}`;
-
-            billWindow.document.write(`
-                    <html><head><title>Invoice ${invoiceId}</title>
-                    <style>
-                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600&display=swap');
-                        body { font-family: 'Noto Sans Bengali', sans-serif; margin: 25px; } .container { border: 2px solid #000; padding: 25px; }
-                        .header { text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 20px;}
-                        .header h2 { margin: 0; } .header p { margin: 5px 0; font-size: 14px; } .meta { display: flex; justify-content: space-between; margin-bottom: 20px;}
-                        table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
-                        th { background: #f2f2f2; } .total td { font-weight: bold; font-size: 1.2em; } .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ccc; font-size: 14px;}
-                    </style></head><body><div class="container">
-                       <div class="header" style="position: relative;">
-                            <div style="position: absolute; left: 0; top: 0; text-align: left;">
-                                <img src="hallmark_logo.jpg" alt="Hallmark" style="height: 55px; border-radius: 4px;">
-                                <div style="font-size: 11px; font-weight: bold; color: #333; margin-top: 5px; line-height: 1.3;">
-                                    Certified Hallmark<br>Jewellery Point
-                                </div>
-                            </div>
-
-                            <h2>${t('shopNamePrint')}</h2> <p>${t('footerAddr')}</p> <p>GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
-                        </div>
-                        <div class="meta">
-                            <div><strong>${t('invoiceNo')}:</strong> ${invoiceId}<br><strong>${t('dateStr')}:</strong> ${today}</div>
-                            <div><strong>${t('custName')}:</strong> ${details.customerName}<br><strong>${t('phone')}:</strong> ${details.customerPhone}</div>
-                        </div>
-                        <h3>${t('salesBill')}</h3>
-                        <table>
-                            <tr><th>${t('detailsLabel')}</th><th>${t('weightLabel')}</th><th>${t('totalLabel')}</th></tr>
-                            <tr><td>${t('typeJewelry')} (${details.qualityName})</td><td>${details.weightGrams} ${t('gram')}</td><td>₹${toFixedTrim(details.totalGoldValue).toLocaleString('en-IN')}</td></tr>
-                            <tr><td>${t('makingLabel')}</td><td>${makingDisplay}</td><td>₹${toFixedTrim(details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
-                            <tr><td colspan="2">${t('subtotal')}</td><td>₹${toFixedTrim(details.totalGoldValue + details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
-                            <tr><td colspan="2">${t('gst')} (${details.gstPercent}%)</td><td>₹${toFixedTrim(details.gstAmount).toLocaleString('en-IN')}</td></tr>
-                            <tr class="total"><td colspan="2">${t('totalPriceGST')}</td><td>₹${toFixedTrim(total).toLocaleString('en-IN')}</td></tr>
-                        </table>
-                        <div class="footer"><p>Thank you!</p></div>
-                    </div></body></html>`);
-            billWindow.document.close();
-            billWindow.focus();
-            billWindow.print();
-        }
-
+        // ---------- OLD TO NEW ----------
         function otn_calculateOldToNew() {
             showProgress('otnProgress');
             const oldWeight = getVal('otn_OldWeight');
@@ -3201,6 +2911,422 @@
             $('#otn_bill-preview-modal').style.display = 'none';
         }
 
+        function otn_resetOldToNew() {
+            $('#otn_customerName').value = '';
+            $('#otn_customerMobile').value = '';
+            $('#otn_OldWeight').value = '10';
+            $('#otn_OldWeightInAna').value = (10 * GRAMS_TO_ANA_RATE).toFixed(3);
+            $('#otn_OldType').value = 'desi_bengali';
+            $('#otn_NewWeight').value = '10';
+            $('#otn_NewWeightInAna').value = (10 * GRAMS_TO_ANA_RATE).toFixed(3);
+            $('#otn_NewType').value = 'Licence';
+            $('#otn_BasePrice24ct').value = '140000';
+            $('#otn_makingChargeType').value = 'percent';
+            $('#otn_makingChargeValue').value = '9.99';
+            $('#otn_GstPercent').value = '3';
+            otn_calculateOldToNew();
+        }
+
+        // ---------- SAVE & PRINT BILL (Profit) ----------
+        function saveAndPrintBill() {
+            const calcData = calculateProfit(true);
+            if (!calcData) { showToast(t('toastNeedCalc')); return; }
+
+            const { details, total } = calcData;
+            details.total = total;
+            details.id = Date.now();
+            details.date = new Date().toISOString();
+            details.billType = 'profit';
+
+            let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
+            bills.unshift(details);
+            localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
+
+            showToast(t('toastSaved'));
+            const billWindow = window.open('', 'PRINT', 'height=700,width=900');
+            const today = new Date(details.date).toLocaleDateString(getLocale(), { year: 'numeric', month: 'long',
+                day: 'numeric' });
+            const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
+            let makingDisplay = '';
+            if (details.makingChargeType === 'pergram') makingDisplay = `@ ₹${details.makingChargeValue}/${t('gram')}`;
+            else if (details.makingChargeType === 'percent') makingDisplay = `@ ${details.makingChargeValue}%`;
+            else makingDisplay = `@ ${t('fixed')} ₹${details.makingChargeValue}`;
+
+            billWindow.document.write(`
+                    <html><head><title>Invoice ${invoiceId}</title>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600&display=swap');
+                        body { font-family: 'Noto Sans Bengali', sans-serif; margin: 25px; } .container { border: 2px solid #000; padding: 25px; }
+                        .header { text-align: center; border-bottom: 1px solid #ccc; padding-bottom: 15px; margin-bottom: 20px;}
+                        .header h2 { margin: 0; } .header p { margin: 5px 0; font-size: 14px; } .meta { display: flex; justify-content: space-between; margin-bottom: 20px;}
+                        table { width: 100%; border-collapse: collapse; } th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+                        th { background: #f2f2f2; } .total td { font-weight: bold; font-size: 1.2em; } .footer { text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #ccc; font-size: 14px;}
+                    </style></head><body><div class="container">
+                       <div class="header" style="position: relative;">
+                            <div style="position: absolute; left: 0; top: 0; text-align: left;">
+                                <img src="hallmark_logo.jpg" alt="Hallmark" style="height: 55px; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: bold; color: #333; margin-top: 5px; line-height: 1.3;">
+                                    Certified Hallmark<br>Jewellery Point
+                                </div>
+                            </div>
+
+                            <h2>${t('shopNamePrint')}</h2> <p>${t('footerAddr')}</p> <p>GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
+                        </div>
+                        <div class="meta">
+                            <div><strong>${t('invoiceNo')}:</strong> ${invoiceId}<br><strong>${t('dateStr')}:</strong> ${today}</div>
+                            <div><strong>${t('custName')}:</strong> ${details.customerName}<br><strong>${t('phone')}:</strong> ${details.customerPhone}</div>
+                        </div>
+                        <h3>${t('salesBill')}</h3>
+                        <table>
+                            <tr><th>${t('detailsLabel')}</th><th>${t('weightLabel')}</th><th>${t('totalLabel')}</th></tr>
+                            <tr><td>${t('typeJewelry')} (${details.qualityName})</td><td>${details.weightGrams} ${t('gram')}</td><td>₹${toFixedTrim(details.totalGoldValue).toLocaleString('en-IN')}</td></tr>
+                            <tr><td>${t('makingLabel')}</td><td>${makingDisplay}</td><td>₹${toFixedTrim(details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
+                            <tr><td colspan="2">${t('subtotal')}</td><td>₹${toFixedTrim(details.totalGoldValue + details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
+                            <tr><td colspan="2">${t('gst')} (${details.gstPercent}%)</td><td>₹${toFixedTrim(details.gstAmount).toLocaleString('en-IN')}</td></tr>
+                            <tr class="total"><td colspan="2">${t('totalPriceGST')}</td><td>₹${toFixedTrim(total).toLocaleString('en-IN')}</td></tr>
+                        </table>
+                        <div class="footer"><p>Thank you!</p></div>
+                    </div></body></html>`);
+            billWindow.document.close();
+            billWindow.focus();
+            billWindow.print();
+        }
+
+        function previewBill() {
+            const calcData = calculateProfit(true);
+            if (!calcData) {
+                showToast(t('toastNeedCalc'));
+                return;
+            }
+            const { details, total } = calcData;
+            const invoiceId = `SJ-PREVIEW`;
+
+            $('#modalTitle').textContent = t('billPreviewTitle');
+            const modalBody = $('#modalBody');
+            let makingDisplay = '';
+            if (details.makingChargeType === 'pergram') makingDisplay = `@ ₹${details.makingChargeValue}/${t('gram')}`;
+            else if (details.makingChargeType === 'percent') makingDisplay = `${details.makingChargeValue}%`;
+            else makingDisplay = t('fixed');
+            modalBody.innerHTML = `
+                    <table class="bill-details-table">
+                        <tr><td>${t('invoiceNo')}:</td><td>${invoiceId}</td></tr>
+                        <tr><td>${t('custName')}:</td><td>${details.customerName}</td></tr>
+                        <tr><td>${t('phone')}:</td><td>${details.customerPhone}</td></tr>
+                        <tr><td>${t('dateStr')}:</td><td>${new Date().toLocaleDateString(getLocale(), {day:'numeric', month:'long', year:'numeric'})}</td></tr>
+                        <tr><td colspan="2"><hr></td></tr>
+                        <tr><td>${t('typeJewelry')}:</td><td>${details.qualityName}</td></tr>
+                        <tr><td>${t('weightLabel')}:</td><td>${details.weightGrams} ${t('gram')}</td></tr>
+                        <tr><td>${t('goldValue')}:</td><td>₹${toFixedTrim(details.totalGoldValue).toLocaleString('en-IN')}</td></tr>
+                        <tr><td>${t('makingLabel')}:</td><td>${makingDisplay}</td></tr>
+                        <tr><td>${t('subtotal')}:</td><td>₹${toFixedTrim(details.totalGoldValue + details.totalMakingCharge).toLocaleString('en-IN')}</td></tr>
+                        <tr><td>${t('gst')} (${details.gstPercent}%):</td><td>₹${toFixedTrim(details.gstAmount).toLocaleString('en-IN')}</td></tr>
+                        <tr class="total-row"><td>${t('totalPriceGST')}:</td><td>₹${toFixedTrim(total).toLocaleString('en-IN')}</td></tr>
+                    </table>
+                `;
+            $('#billDetailsModal').style.display = 'flex';
+        }
+
+        // ---------- SAVE & PRINT EXCHANGE ----------
+        function saveAndPrintExchangeBill() {
+            const details = calculateExchange(true);
+            if (!details || (details.newWeight <= 0 && details.oldWeight <= 0)) {
+                showToast(t('toastNeedCalc'));
+                return;
+            }
+            details.id = Date.now();
+            details.date = new Date().toISOString();
+            details.billType = 'exchange';
+            let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
+            bills.unshift(details);
+            localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
+            showToast(t('toastSaved'));
+            const printWindow = window.open('', '', 'height=800,width=800');
+            const today = new Date(details.date).toLocaleDateString(getLocale(), { year: 'numeric', month: 'long',
+                day: 'numeric' });
+            const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
+
+            let title = details.exchangeMode === 'nakmachi' ? 'Nakmachi Exchange' : t('exchangeBill');
+
+            let balanceText = '';
+            if (details.balance > 0.005) {
+                balanceText =
+                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('custPay')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${details.finalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+            } else if (details.balance < -0.005) {
+                balanceText =
+                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('shopReturn')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${Math.abs(details.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+            } else {
+                balanceText =
+                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('balance')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹0.00</td></tr>`;
+            }
+
+            let makingDisplay = '';
+            if (details.labourType === 'pergram') makingDisplay = `@ ₹${details.labourValue}/${t('gram')}`;
+            else if (details.labourType === 'percent') makingDisplay = `${details.labourValue}%`;
+            else makingDisplay = t('fixed');
+
+            const billContent = `
+                    <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
+                        <div style="position: relative; text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
+                            <div style="position: absolute; left: 0; top: 0; text-align: left;">
+                                <img src="hallmark_logo.jpg" alt="Hallmark" style="height: 55px; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: bold; color: #333; margin-top: 5px; line-height: 1.3;">
+                                    Certified Hallmark<br>Jewellery Point
+                                </div>
+                            </div>
+                            <h2 style="margin: 0; font-size: 28px; color: #0284c7;">${t('shopNamePrint')}</h2>
+                            <div style="display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 600; margin-top: 5px; color: #333;">
+                                Certified Hallmark Jewellery Point <img src="hallmark_logo.jpg" style="height: 16px; margin-left: 6px;">
+                            </div>
+                            <p style="margin: 5px 0;">${t('footerAddr')}</p>
+                            <p style="margin: 5px 0; font-size: 12px;">GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
+                            <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">${title}</h3>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                            <div><strong>${t('custName')}:</strong> ${details.customerName}</div>
+                            <div><strong>${t('dateStr')}:</strong> ${today}</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                            <div><strong>${t('phone')}:</strong> ${details.customerPhone}</div>
+                            <div><strong>${t('invoiceNo')}:</strong> ${invoiceId}</div>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background-color: #f1f5f9;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">${t('detailsLabel')}</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('weightG')}</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('rateLabel')}</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('totalLabel')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">${t('newJewelry')}</td></tr>
+                                <tr><td>${t('goldValue')}</td><td style="text-align: right;">${details.newWeight.toFixed(3)} ${t('gram')}</td><td style="text-align: right;">${(details.newPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${details.baseNewValue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="2">${t('making')} (${makingDisplay})</td><td style="text-align: right;">-</td><td style="text-align: right;">${details.labourAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="3" style="text-align: right; font-weight:bold;">${t('newJewelryTotal')}:</td><td style="text-align: right; font-weight:bold;">${details.newGross.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+
+                                <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">${t('oldJewelry')}</td></tr>
+                                <tr><td>${t('goldValue')}</td><td style="text-align: right;">${details.oldWeight.toFixed(3)} ${t('gram')}</td><td style="text-align: right;">${(details.oldPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${((details.oldPrice10g / 10) * details.oldWeight).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="2">${t('cutOff')} (${parseFloat((100 - details.purity).toFixed(2))}%)</td><td style="text-align: right;">-</td><td style="text-align: right;">- ${(((details.oldPrice10g / 10) * details.oldWeight) - details.oldNet).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="3" style="text-align: right; font-weight:bold;">${t('oldJewelryTotal')} (${details.purity}%):</td><td style="text-align: right; font-weight:bold;">${details.oldNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+
+                                ${(details.includeGst && details.balance > 0) ? `
+                                <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">>${t('subtotal')}:</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="3" style="text-align: right;">${t('gst')} (${details.gstPercent}%):</td><td style="text-align: right;">${details.gstOnPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                ` : ''}
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top: 2px solid #94a3b8;">
+                                    ${balanceText}
+                                </tr>
+                            </tfoot>
+                        </table>
+                         <div style="margin-top: 30px; text-align: right;">
+                            <p style="margin: 0;">--------------------------</p>
+                            <p style="margin: 5px 0;">${t('signature')}</p>
+                        </div>
+                    </div>
+                `;
+            printWindow.document.write('<html><head><title>Exchange Bill</title>');
+            printWindow.document.write(
+                '<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>'
+                );
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(billContent);
+            printWindow.document.close();
+            setTimeout(() => { printWindow.print(); }, 500);
+        }
+
+        function previewExchange() {
+            const details = calculateExchange(true);
+            if (!details) { showToast(t('toastNeedCalc')); return; }
+            $('#modalTitle').textContent = t('billPreviewTitle');
+            const modalBody = $('#modalBody');
+            let balanceRow = '';
+            if (details.balance > 0.005) {
+                balanceRow = `
+                        <tr><td>>${t('subtotal')}:</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
+                        ${details.includeGst ? `<tr><td>${t('gst')} (${details.gstPercent}%):</td><td>₹${details.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
+                        <tr class="total-row"><td>${t('custPay')}:</td><td>₹${details.finalPayable.toLocaleString('en-IN')}</td></tr>
+                    `;
+            } else if (details.balance < -0.005) {
+                balanceRow =
+                    `<tr class="total-row"><td>${t('shopReturn')}:</td><td>₹${toFixedTrim(Math.abs(details.balance)).toLocaleString('en-IN')}</td></tr>`;
+            } else {
+                balanceRow = `<tr class="total-row"><td>${t('balance')}:</td><td>₹0</td></tr>`;
+            }
+            modalBody.innerHTML = `
+                    <table class="bill-details-table">
+                        <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">${t('newJewelry')}</td></tr>
+                        <tr><td>${t('goldValue')}:</td><td>₹${toFixedTrim(details.baseNewValue).toLocaleString('en-IN')}</td></tr>
+                        <tr><td>${t('makingLabel')}:</td><td>₹${details.labourAmount.toLocaleString('en-IN')}</td></tr>
+                        <tr><td><strong>${t('newJewelryTotal')}:</strong></td><td><strong>₹${details.newGross.toLocaleString('en-IN')}</strong></td></tr>
+                        <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+                        <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">${t('oldJewelry')}</td></tr>
+                        <tr><td>${t('oldJewelryTotal')} (${details.purity}%):</td><td>₹${details.oldNet.toLocaleString('en-IN')}</td></tr>
+                        <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+                        ${balanceRow}
+                    </table>
+                `;
+            $('#billDetailsModal').style.display = 'flex';
+        }
+
+        // ---------- SAVE & PRINT SILVER EXCHANGE ----------
+        function saveAndPrintSilverExchangeBill() {
+            const details = calculateSilverExchange(true);
+            if (!details || (details.newWeight <= 0 && details.oldWeight <= 0)) {
+                showToast(t('toastNeedCalc'));
+                return;
+            }
+            details.id = Date.now();
+            details.date = new Date().toISOString();
+            details.billType = 'silverExchange';
+            let bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
+            bills.unshift(details);
+            localStorage.setItem('solemanJewellersBills', JSON.stringify(bills));
+            showToast(t('toastSaved'));
+            const printWindow = window.open('', '', 'height=800,width=800');
+            const today = new Date(details.date).toLocaleDateString(getLocale(), { year: 'numeric', month: 'long',
+                day: 'numeric' });
+            const invoiceId = `SJ-${details.id.toString().slice(-6)}`;
+
+            let balanceText = '';
+            if (details.balance > 0.005) {
+                balanceText =
+                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('custPay')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${details.finalPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+            } else if (details.balance < -0.005) {
+                balanceText =
+                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('shopReturn')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹${Math.abs(details.balance).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>`;
+            } else {
+                balanceText =
+                    `<tr><td colspan="3" style="text-align: right; font-weight: bold; font-size: 1.2em;">${t('balance')}:</td><td style="text-align:right; font-weight: bold; font-size: 1.2em;">₹0.00</td></tr>`;
+            }
+
+            let makingDisplay = '';
+            if (details.labourType === 'pergram') makingDisplay = `@ ₹${details.labourValue}/${t('gram')}`;
+            else if (details.labourType === 'percent') makingDisplay = `${details.labourValue}%`;
+            else makingDisplay = t('fixed');
+
+            const billContent = `
+                    <div style="font-family: 'Noto Sans Bengali', sans-serif; color: #0f172a; padding: 15px;">
+                        <div style="position: relative; text-align: center; border-bottom: 2px solid #0ea5e9; padding-bottom: 10px; margin-bottom: 20px;">
+                            <div style="position: absolute; left: 0; top: 0; text-align: left;">
+                                <img src="hallmark_logo.jpg" alt="Hallmark" style="height: 55px; border-radius: 4px;">
+                                <div style="font-size: 11px; font-weight: bold; color: #333; margin-top: 5px; line-height: 1.3;">
+                                    Certified Hallmark<br>Jewellery Point
+                                </div>
+                            </div>
+                            <h2 style="margin: 0; font-size: 28px; color: #0284c7;">${t('shopNamePrint')}</h2>
+                            <div style="display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: 600; margin-top: 5px; color: #333;">
+                                Certified Hallmark Jewellery Point <img src="hallmark_logo.jpg" style="height: 16px; margin-left: 6px;">
+                            </div>
+                            <p style="margin: 5px 0;">${t('footerAddr')}</p>
+                            <p style="margin: 5px 0; font-size: 12px;">GSTIN: 19BMZPR4273E1Z9 | BIS Licence: HM/C-5191720314</p>
+                            <h3 style="margin: 15px 0 5px; font-size: 20px; color: #1e293b;">${t('silverExBill')}</h3>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                            <div><strong>${t('custName')}:</strong> ${details.customerName}</div>
+                            <div><strong>${t('dateStr')}:</strong> ${today}</div>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                            <div><strong>${t('phone')}:</strong> ${details.customerPhone}</div>
+                            <div><strong>${t('invoiceNo')}:</strong> ${invoiceId}</div>
+                        </div>
+
+                        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                            <thead>
+                                <tr style="background-color: #f1f5f9;">
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #cbd5e1;">${t('detailsLabel')}</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('weightG')}</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('rateLabel')}</th>
+                                <th style="padding: 10px; text-align: right; border-bottom: 1px solid #cbd5e1;">${t('totalLabel')}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">${t('newSilver')}</td></tr>
+                                <tr><td>${t('goldValue')}</td><td style="text-align: right;">${details.newWeight.toFixed(3)} ${t('gram')}</td><td style="text-align: right;">${(details.newPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${details.baseNewValue.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="2">${t('making')} (${makingDisplay})</td><td style="text-align: right;">-</td><td style="text-align: right;">${details.labourAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="3" style="text-align: right; font-weight:bold;">${t('newJewelryTotal')}:</td><td style="text-align: right; font-weight:bold;">${details.newGross.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+
+                                <tr><td colspan="4" style="background: #f1f5f9; font-weight:bold;">${t('oldSilver')}</td></tr>
+                                <tr><td>${t('goldValue')}</td><td style="text-align: right;">${details.oldWeight.toFixed(3)} ${t('gram')}</td><td style="text-align: right;">${(details.oldPrice10g/10).toLocaleString('en-IN', {maximumFractionDigits: 2})}/g</td><td style="text-align: right;">${((details.oldPrice10g / 10) * details.oldWeight).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="2">${t('cutOff')} (${parseFloat((100 - details.purity).toFixed(2))}%)</td><td style="text-align: right;">-</td><td style="text-align: right;">- ${(((details.oldPrice10g / 10) * details.oldWeight) - details.oldNet).toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="3" style="text-align: right; font-weight:bold;">${t('oldJewelryTotal')} (${details.purity}%):</td><td style="text-align: right; font-weight:bold;">${details.oldNet.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+
+                                ${(details.includeGst && details.balance > 0) ? `
+                                <tr><td colspan="3" style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">>${t('subtotal')}:</td><td style="text-align: right; border-top: 1px solid #cbd5e1; padding-top:10px;">${details.balance.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                <tr><td colspan="3" style="text-align: right;">${t('gst')} (${details.gstPercent}%):</td><td style="text-align: right;">${details.gstOnPayable.toLocaleString('en-IN', {minimumFractionDigits: 2})}</td></tr>
+                                ` : ''}
+                            </tbody>
+                            <tfoot>
+                                <tr style="border-top: 2px solid #94a3b8;">
+                                    ${balanceText}
+                                </tr>
+                            </tfoot>
+                        </table>
+                         <div style="margin-top: 30px; text-align: right;">
+                            <p style="margin: 0;">--------------------------</p>
+                            <p style="margin: 5px 0;">${t('signature')}</p>
+                        </div>
+                    </div>
+                `;
+            printWindow.document.write('<html><head><title>Silver Exchange Bill</title>');
+            printWindow.document.write(
+                '<style>@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;600;700&display=swap"); body { font-family: "Noto Sans Bengali", sans-serif; margin: 20px; }</style>'
+                );
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(billContent);
+            printWindow.document.close();
+            setTimeout(() => { printWindow.print(); }, 500);
+        }
+
+        function previewSilverExchange() {
+            const details = calculateSilverExchange(true);
+            if (!details) { showToast(t('toastNeedCalc')); return; }
+            $('#modalTitle').textContent = t('billPreviewTitle');
+            const modalBody = $('#modalBody');
+            let balanceRow = '';
+            if (details.balance > 0.005) {
+                balanceRow = `
+                        <tr><td>>${t('subtotal')}:</td><td>₹${details.balance.toLocaleString('en-IN')}</td></tr>
+                        ${details.includeGst ? `<tr><td>${t('gst')} (${details.gstPercent}%):</td><td>₹${details.gstOnPayable.toLocaleString('en-IN')}</td></tr>` : ''}
+                        <tr class="total-row"><td>${t('custPay')}:</td><td>₹${details.finalPayable.toLocaleString('en-IN')}</td></tr>
+                    `;
+            } else if (details.balance < -0.005) {
+                balanceRow =
+                    `<tr class="total-row"><td>${t('shopReturn')}:</td><td>₹${toFixedTrim(Math.abs(details.balance)).toLocaleString('en-IN')}</td></tr>`;
+            } else {
+                balanceRow = `<tr class="total-row"><td>${t('balance')}:</td><td>₹0</td></tr>`;
+            }
+            modalBody.innerHTML = `
+                    <table class="bill-details-table">
+                        <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">${t('newSilver')}</td></tr>
+                        <tr><td>${t('goldValue')}:</td><td>₹${toFixedTrim(details.baseNewValue).toLocaleString('en-IN')}</td></tr>
+                        <tr><td>${t('makingLabel')}:</td><td>₹${details.labourAmount.toLocaleString('en-IN')}</td></tr>
+                        <tr><td><strong>${t('newJewelryTotal')}:</strong></td><td><strong>₹${details.newGross.toLocaleString('en-IN')}</strong></td></tr>
+                        <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+                        <tr><td colspan="2" style="background:#f2f2f2; font-weight:bold;">${t('oldSilver')}</td></tr>
+                        <tr><td>${t('oldJewelryTotal')} (${details.purity}%):</td><td>₹${details.oldNet.toLocaleString('en-IN')}</td></tr>
+                        <tr><td colspan="2"><hr style="margin:5px 0;"></td></tr>
+                        ${balanceRow}
+                    </table>
+                `;
+            $('#billDetailsModal').style.display = 'flex';
+        }
+
+        function resetProfit() {
+            $('#customerName').value = '';
+            $('#customerPhone').value = '';
+            $('#profitWeight').value = '10';
+            $('#basePrice24ct').value = '140000';
+            $('#profitMakingChargeType').value = 'percent';
+            $('#profitMakingChargeValue').value = '12';
+            $('#goldQuality').value = 'Licence';
+            calculateProfit();
+            updateAllAnaDisplays();
+        }
+
+        // ---------- BILL HISTORY ----------
         function displayBillHistory() {
             const container = $('#billHistoryContainer');
             const bills = JSON.parse(localStorage.getItem('solemanJewellersBills')) || [];
@@ -3440,85 +3566,7 @@
             $('#billDetailsModal').style.display = 'flex';
         }
 
-        function resetProfit() {
-            $('#customerName').value = '';
-            $('#customerPhone').value = '';
-            $('#profitWeight').value = '10';
-            $('#basePrice24ct').value = '140000';
-            $('#profitMakingChargeType').value = 'percent';
-            $('#profitMakingChargeValue').value = '12';
-            $('#goldQuality').value = 'Licence';
-            calculateProfit();
-            updateAllAnaDisplays();
-        }
-
-        function resetExchange() {
-            $('#exchangeCustomerName').value = '';
-            $('#exchangeCustomerPhone').value = '';
-            $('#newWeight').value = '0';
-            const price24ct = getVal('basePrice24ct') || 140000;
-
-            if (currentExchangeMode === 'nakmachi') {
-                $('#newPrice11').value = price24ct * 0.65;
-                $('#labourType').value = 'percent';
-                $('#labourValue').value = '15';
-                $('#oldPrice11').value = '138000';
-                $('#purity').value = '35';
-            } else {
-                $('#newPrice11').value = price24ct;
-                $('#labourType').value = 'percent';
-                $('#labourValue').value = '12';
-                $('#oldPrice11').value = '138000';
-                $('#purity').value = '65';
-            }
-
-            $('#oldWeight').value = '0';
-            $('#includeGstExchange').checked = true;
-            calculateExchange(false);
-            updateAllAnaDisplays();
-            updateAllDeductionDisplays();
-        }
-
-        function otn_resetOldToNew() {
-            $('#otn_customerName').value = '';
-            $('#otn_customerMobile').value = '';
-            $('#otn_OldWeight').value = '10';
-            $('#otn_OldWeightInAna').value = (10 * GRAMS_TO_ANA_RATE).toFixed(3);
-            $('#otn_OldType').value = 'desi_bengali';
-            $('#otn_NewWeight').value = '10';
-            $('#otn_NewWeightInAna').value = (10 * GRAMS_TO_ANA_RATE).toFixed(3);
-            $('#otn_NewType').value = 'Licence';
-            $('#otn_BasePrice24ct').value = '140000';
-            $('#otn_makingChargeType').value = 'percent';
-            $('#otn_makingChargeValue').value = '9.99';
-            $('#otn_GstPercent').value = '3';
-            otn_calculateOldToNew();
-        }
-
-        function resetSilverExchange() {
-            $('#silverCustomerName').value = '';
-            $('#silverCustomerPhone').value = '';
-            $('#newWeightSilver').value = '0';
-            $('#labourTypeSilver').value = 'percent';
-            $('#labourValueSilver').value = '12';
-            $('#oldWeightSilver').value = '0';
-
-            if (currentSilverMode === 'sell') {
-                $('#puritySilver').value = '30';
-                $('#oldPrice11Silver').value = '1800';
-            } else {
-                $('#puritySilver').value = '65';
-                $('#oldPrice11Silver').value = '1700';
-            }
-            $('#newPrice11Silver').value = '2050';
-
-            $('#includeGstExchangeSilver').checked = true;
-            calculateSilverExchange(false);
-            updateAllAnaDisplays();
-            updateAllDeductionDisplays();
-        }
-
-        // ======================== GOLD LOAN ========================
+        // ---------- GOLD LOAN ----------
         let gl_transactions = [];
         let gl_currentAccountId = null;
         let gl_calculationDone = false;
@@ -3534,7 +3582,6 @@
             }
         }
 
-        // ====== ACCOUNT LIST: newest first (sorted by id descending) ======
         function gl_loadAccountList() {
             const listContainer = document.getElementById('gl_savedAccountsList');
             const saved = localStorage.getItem('soleman_loan_accounts');
@@ -3557,7 +3604,6 @@
                     year: 'numeric'
                 }) : 'N/A';
 
-                // Build stats grid
                 let statsHtml = '';
                 const calcResult = acc.calculationResult;
                 if (calcResult && calcResult.durationText && calcResult.durationText !== '-') {
@@ -3585,7 +3631,6 @@
                     statsHtml = `<div class="no-calc-data">${t('noCalcData')}</div>`;
                 }
 
-                // *************** DELETE BUTTON ADDED ***************
                 return `
                         <div class="account-item">
                             <div class="account-header">
@@ -3605,7 +3650,6 @@
             updateHistoryBadge(accounts.length);
         }
 
-        // ====== DELETE ACCOUNT FUNCTION ======
         function gl_deleteAccount(id) {
             customConfirm(t('confirmDel'), () => {
                 const saved = localStorage.getItem('soleman_loan_accounts');
@@ -3614,7 +3658,6 @@
                 localStorage.setItem('soleman_loan_accounts', JSON.stringify(accounts));
                 gl_loadAccountList();
                 showToast(t('loanAccDeleted'));
-                // If the deleted account was the currently loaded one, reset the view
                 if (gl_currentAccountId === id) {
                     gl_executeReset();
                 }
@@ -4201,7 +4244,7 @@
             setTimeout(() => { printWindow.print(); }, 500);
         }
 
-        // =============== HISTORY TOGGLE ===============
+        // ---------- HISTORY TOGGLE ----------
         function gl_toggleHistory() {
             const wrapper = document.getElementById('gl_accountListWrapper');
             const btnText = document.getElementById('gl_historyToggleText');
@@ -4218,7 +4261,7 @@
             }
         }
 
-        // =============== AUTO-CALC TRIGGERS FOR GOLD LOAN ===============
+        // ---------- AUTO-CALC ----------
         function setupLoanAutoCalc() {
             const interestRate = document.getElementById('gl_interestRate');
             const interestType = document.getElementById('gl_interestType');
@@ -4245,73 +4288,7 @@
             });
         }
 
-        let serverSaveDebounceTimer;
-
-        function loadFromServer() {
-            try {
-                fetch('server.php?t=' + new Date().getTime())
-                    .then(response => {
-                        if (!response.ok) return {};
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.bills) localStorage.setItem('solemanJewellersBills', data.bills);
-                        if (data.loans) localStorage.setItem('soleman_loan_accounts', data.loans);
-                        if (data.settings) localStorage.setItem('solemanJewellersSettings', data.settings);
-
-                        if (typeof displayBillHistory === 'function') displayBillHistory();
-                        if (typeof gl_loadAccountList === 'function') gl_loadAccountList();
-                        console.log("Data loaded from server.");
-                    })
-                    .catch(err => console.log("Load Error (Local environment likely):", err));
-            } catch (e) {
-                console.log("Local execution block.", e);
-            }
-        }
-
-        function saveToServer() {
-            clearTimeout(serverSaveDebounceTimer);
-            updateSyncUI('saving');
-
-            serverSaveDebounceTimer = setTimeout(() => {
-                const allData = {
-                    bills: localStorage.getItem('solemanJewellersBills'),
-                    loans: localStorage.getItem('soleman_loan_accounts'),
-                    settings: localStorage.getItem('solemanJewellersSettings')
-                };
-
-                try {
-                    fetch('server.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(allData)
-                    }).then(response => {
-                        if (response.ok) {
-                            console.log("Data saved to server.");
-                            updateSyncUI('saved');
-                        } else {
-                            updateSyncUI('error');
-                        }
-                    }).catch(err => {
-                        console.log("Save Error:", err);
-                        updateSyncUI('error');
-                    });
-                } catch (e) {
-                    updateSyncUI('error');
-                }
-            }, 1000);
-        }
-
-        const originalSetItem = Storage.prototype.setItem;
-        Storage.prototype.setItem = function(key, value) {
-            originalSetItem.apply(this, arguments);
-            if (key.includes('soleman')) {
-                saveToServer();
-            }
-        };
-
-        let isCalculating = false;
-
+        // ---------- WEIGHT CONVERSION ----------
         function setupWeightConversion(gramId, anaId) {
             const gramInput = $(`#${gramId}`);
             const anaInput = $(`#${anaId}`);
@@ -4363,31 +4340,18 @@
             }
 
             gramInput.addEventListener('input', () => {
-                if (isCalculating) return;
-                isCalculating = true;
                 const grams = getVal(gramId);
                 const anas = grams * GRAMS_TO_ANA_RATE;
                 anaInput.value = grams > 0 ? anas.toFixed(3) : '';
                 updateTraditionalDisplay(anas);
-
-                if (typeof updateAllAnaDisplays === 'function') updateAllAnaDisplays();
-
-                isCalculating = false;
             });
 
             anaInput.addEventListener('input', () => {
-                if (isCalculating) return;
-                isCalculating = true;
                 const anas = getVal(anaId);
                 gramInput.value = anas > 0 ? (anas / GRAMS_TO_ANA_RATE).toFixed(3) : '';
                 gramInput.dispatchEvent(new Event('input', { bubbles: true }));
                 updateTraditionalDisplay(anas);
-                isCalculating = false;
             });
-
-            setTimeout(() => {
-                updateTraditionalDisplay(getVal(anaId));
-            }, 200);
         }
 
         function setQuickPurity(inputId, value) {
@@ -4422,6 +4386,43 @@
             setTimeout(updateDeduction, 200);
         }
 
+        function updateAllAnaDisplays() {
+            ['profitWeightInAna', 'newWeightInAna', 'oldWeightInAna', 'newWeightSilverInAna', 'oldWeightSilverInAna',
+                'otn_OldWeightInAna', 'otn_NewWeightInAna'
+            ].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    const event = new Event('input');
+                    input.dispatchEvent(event);
+                }
+            });
+        }
+
+        function updateAllDeductionDisplays() {
+            ['purity', 'puritySilver'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.dispatchEvent(new Event('input'));
+                }
+            });
+        }
+
+        // ---------- SYNC PRICE ----------
+        function syncAndSavePrice(newPrice) {
+            document.getElementById('basePrice24ct').value = newPrice;
+            document.getElementById('otn_BasePrice24ct').value = newPrice;
+            if (currentExchangeMode === 'nakmachi') {
+                document.getElementById('newPrice11').value = newPrice * 0.65;
+            } else {
+                document.getElementById('newPrice11').value = newPrice;
+            }
+            fetchLivePrice();
+            // Save to Firebase via localStorage override
+            localStorage.setItem('soleman_temp_price', newPrice);
+            saveToServer();
+        }
+
+        // ---------- WINDOW LOAD ----------
         window.onload = function() {
 
             document.addEventListener('wheel', function(event) {
@@ -4435,146 +4436,7 @@
                 document.querySelector('#headerToggleIcon use').setAttribute('href', '#icon-chevron-down');
             }
 
-            let priceSaveTimeout;
-            let otherPriceSaveTimeout;
-
-            function syncAndSavePrice(newPrice) {
-                document.getElementById('basePrice24ct').value = newPrice;
-                document.getElementById('otn_BasePrice24ct').value = newPrice;
-
-                if (currentExchangeMode === 'nakmachi') {
-                    document.getElementById('newPrice11').value = newPrice * 0.65;
-                } else {
-                    document.getElementById('newPrice11').value = newPrice;
-                }
-
-                fetchLivePrice();
-
-                clearTimeout(priceSaveTimeout);
-                updateSyncUI('saving');
-
-                try {
-                    priceSaveTimeout = setTimeout(() => {
-                        fetch('save_price.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ goldPrice: newPrice })
-                        })
-                        .then(response => {
-                            if (response.ok) updateSyncUI('saved');
-                            else updateSyncUI('error');
-                            return response.json();
-                        })
-                        .then(data => console.log('Gold Price Saved to Server:', newPrice))
-                        .catch(error => {
-                            updateSyncUI('error');
-                        });
-                    }, 1000);
-                } catch (e) {
-                    updateSyncUI('error');
-                }
-            }
-
-            function saveOtherPriceToServer(key, value) {
-                clearTimeout(otherPriceSaveTimeout);
-                updateSyncUI('saving');
-
-                try {
-                    otherPriceSaveTimeout = setTimeout(() => {
-                        let payload = {};
-                        payload[key] = value;
-
-                        fetch('save_price.php', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        })
-                        .then(response => {
-                            if (response.ok) updateSyncUI('saved');
-                            else updateSyncUI('error');
-                            return response.json();
-                        })
-                        .then(data => console.log(key + ' Saved to Server:', value))
-                        .catch(error => {
-                            updateSyncUI('error');
-                        });
-                    }, 1000);
-                } catch (e) {
-                    updateSyncUI('error');
-                }
-            }
-
-            const priceInput1 = document.getElementById('basePrice24ct');
-            const priceInput2 = document.getElementById('otn_BasePrice24ct');
-
-            if (priceInput1) {
-                priceInput1.addEventListener('input', function() {
-                    syncAndSavePrice(this.value);
-                    calculateProfit();
-                });
-            }
-
-            if (priceInput2) {
-                priceInput2.addEventListener('input', function() {
-                    syncAndSavePrice(this.value);
-                    if (typeof otn_calculateOldToNew === 'function') {
-                        otn_calculateOldToNew();
-                    }
-                });
-            }
-
-            const oldGoldPriceInput = document.getElementById('oldPrice11');
-            if (oldGoldPriceInput) {
-                oldGoldPriceInput.addEventListener('input', function() {
-                    const saveKey = currentExchangeMode === 'nakmachi' ? 'oldGoldPriceNakmachi' :
-                        'oldGoldPriceGeneral';
-                    saveOtherPriceToServer(saveKey, this.value);
-                });
-            }
-
-            const newSilverPriceInput = document.getElementById('newPrice11Silver');
-            if (newSilverPriceInput) {
-                newSilverPriceInput.addEventListener('input', function() {
-                    saveOtherPriceToServer('newSilverPrice', this.value);
-                });
-            }
-
-            const oldSilverPriceInput = document.getElementById('oldPrice11Silver');
-            if (oldSilverPriceInput) {
-                oldSilverPriceInput.addEventListener('input', function() {
-                    saveOtherPriceToServer('oldSilverPrice', this.value);
-                });
-            }
-
-            function updatePriceFromServer() {
-                try {
-                    fetch('price.json?t=' + new Date().getTime())
-                        .then(response => {
-                            if (!response.ok) return {};
-                            return response.json();
-                        })
-                        .then(data => {
-                            if (data.goldPrice) {
-                                document.getElementById('basePrice24ct').value = data.goldPrice;
-                                document.getElementById('otn_BasePrice24ct').value = data.goldPrice;
-                                document.getElementById('newPrice11').value = currentExchangeMode ===
-                                    'nakmachi' ? data.goldPrice * 0.65 : data.goldPrice;
-                                fetchLivePrice();
-                            }
-                            if (data.oldGoldPriceGeneral && currentExchangeMode === 'general')
-                                document.getElementById('oldPrice11').value = data.oldGoldPriceGeneral;
-                            if (data.oldGoldPriceNakmachi && currentExchangeMode === 'nakmachi')
-                                document.getElementById('oldPrice11').value = data.oldGoldPriceNakmachi;
-                            if (data.newSilverPrice) document.getElementById('newPrice11Silver').value = data
-                                .newSilverPrice;
-                            if (data.oldSilverPrice) document.getElementById('oldPrice11Silver').value = data
-                                .oldSilverPrice;
-                        })
-                        .catch(error => console.log('Price fetch failed (likely local).'));
-                } catch (e) {}
-            }
-
-            setTimeout(updatePriceFromServer, 1000);
+            // Load from Firebase
             loadFromServer();
 
             updateDateDisplay();
@@ -4653,6 +4515,24 @@
                 input.addEventListener('input', otn_calculateOldToNew);
             });
 
+            // Price sync
+            const priceInput1 = document.getElementById('basePrice24ct');
+            const priceInput2 = document.getElementById('otn_BasePrice24ct');
+
+            if (priceInput1) {
+                priceInput1.addEventListener('input', function() {
+                    syncAndSavePrice(this.value);
+                    calculateProfit();
+                });
+            }
+
+            if (priceInput2) {
+                priceInput2.addEventListener('input', function() {
+                    syncAndSavePrice(this.value);
+                    otn_calculateOldToNew();
+                });
+            }
+
             const modal = $('#billDetailsModal');
             $('#modalCloseBtn').onclick = () => { modal.style.display = 'none'; };
             modal.onclick = (event) => { if (event.target === modal) { modal.style.display = 'none'; } };
@@ -4672,5 +4552,6 @@
             fetchLivePrice();
         };
     </script>
+
 </body>
 </html>
