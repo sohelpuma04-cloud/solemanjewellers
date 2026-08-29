@@ -1,49 +1,57 @@
 <?php
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
 
-$dataDir = __DIR__ . '/data';
-if (!is_dir($dataDir)) {
-    mkdir($dataDir, 0755, true);
-}
+// ১. ফ্রন্টএন্ড থেকে পাঠানো ডাটা (JSON) রিসিভ করা
+$inputJSON = file_get_contents('php://input');
+$inputData = json_decode($inputJSON, true);
 
-function readPriceFile() {
-    global $dataDir;
-    $path = $dataDir . '/prices.json';
-    if (file_exists($path)) {
-        $content = file_get_contents($path);
-        return json_decode($content, true) ?: [];
+if ($inputData) {
+    $jsonFile = 'price.json';
+    $currentData = [];
+
+    // ২. যদি আগে থেকে price.json ফাইল থাকে, তবে তার ডাটা পড়ে নেওয়া
+    if (file_exists($jsonFile)) {
+        $fileContent = file_get_contents($jsonFile);
+        $currentData = json_decode($fileContent, true);
+        if (!is_array($currentData)) {
+            $currentData = [];
+        }
     }
-    return [];
+
+    // ৩. নতুন আসা দামগুলো পুরানো ডাটার সাথে আপডেট করা
+    if (isset($inputData['goldPrice'])) {
+        $currentData['goldPrice'] = $inputData['goldPrice'];
+    }
+    if (isset($inputData['oldGoldPriceGeneral'])) {
+        $currentData['oldGoldPriceGeneral'] = $inputData['oldGoldPriceGeneral'];
+    }
+    if (isset($inputData['oldGoldPriceNakmachi'])) {
+        $currentData['oldGoldPriceNakmachi'] = $inputData['oldGoldPriceNakmachi'];
+    }
+    if (isset($inputData['newSilverPrice'])) {
+        $currentData['newSilverPrice'] = $inputData['newSilverPrice'];
+    }
+    if (isset($inputData['oldSilverPrice'])) {
+        $currentData['oldSilverPrice'] = $inputData['oldSilverPrice'];
+    }
+
+    // ৪. আপডেট করা ডাটা আবার price.json ফাইলে সেভ করা (JSON_PRETTY_PRINT দিয়ে সুন্দরভাবে সাজিয়ে)
+    if (file_put_contents($jsonFile, json_encode($currentData, JSON_PRETTY_PRINT))) {
+        echo json_encode([
+            'status' => 'success', 
+            'message' => 'দামের তালিকা সফলভাবে সেভ হয়েছে!', 
+            'data' => $currentData
+        ]);
+    } else {
+        echo json_encode([
+            'status' => 'error', 
+            'message' => 'ফাইলে ডাটা সেভ করতে সমস্যা হয়েছে।'
+        ]);
+    }
+} else {
+    echo json_encode([
+        'status' => 'error', 
+        'message' => 'কোনো সঠিক ডাটা পাওয়া যায়নি।'
+    ]);
 }
-
-function writePriceFile($data) {
-    global $dataDir;
-    $path = $dataDir . '/prices.json';
-    file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT));
-}
-
-$input = json_decode(file_get_contents('php://input'), true);
-if (!$input) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid JSON']);
-    exit;
-}
-
-$current = readPriceFile();
-
-// নতুন মান মার্জ করুন
-foreach ($input as $key => $value) {
-    $current[$key] = $value;
-}
-
-writePriceFile($current);
-
-// একই সাথে price.json ফাইলও আপডেট করুন (HTML যে ফাইল থেকে পড়ে)
-$priceJsonPath = __DIR__ . '/price.json';
-file_put_contents($priceJsonPath, json_encode($current, JSON_PRETTY_PRINT));
-
-echo json_encode(['status' => 'success', 'data' => $current]);
 ?>
