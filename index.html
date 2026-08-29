@@ -67,7 +67,65 @@
             100% { transform: translateX(10%) translateY(10%); }
         }
 
-        /* Language toggle removed */
+        /* ===== HEADER TOGGLE BUTTON – Mobile only, small, bottom-right ===== */
+        .header-toggle-tab {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            top: auto;
+            left: auto;
+            transform: none;
+            background: rgba(2, 132, 199, 0.88);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            cursor: pointer;
+            z-index: 2001;
+            box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            touch-action: manipulation;
+        }
+        .header-toggle-tab:hover {
+            background: var(--primary-color);
+            transform: scale(1.08);
+            box-shadow: 0 6px 24px rgba(14, 165, 233, 0.5);
+        }
+        .header-toggle-tab:active {
+            transform: scale(0.92);
+        }
+        .header-toggle-tab .icon {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+        /* Hide completely on desktop */
+        @media (min-width: 769px) {
+            .header-toggle-tab {
+                display: none !important;
+            }
+        }
+        /* Slightly smaller on very small screens */
+        @media (max-width: 420px) {
+            .header-toggle-tab {
+                width: 38px;
+                height: 38px;
+                bottom: 80px;
+                right: 14px;
+            }
+            .header-toggle-tab .icon {
+                width: 17px;
+                height: 17px;
+            }
+        }
 
         .theme-toggle-btn {
             background: rgba(0,0,0,0.15);
@@ -90,31 +148,6 @@
         .theme-toggle-btn svg {
             width: 18px;
             height: 18px;
-        }
-
-        .header-toggle-tab {
-            position: fixed;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(2,132,199,0.9);
-            backdrop-filter: blur(4px);
-            color: #fff;
-            border: none;
-            border-bottom-left-radius: 12px;
-            border-bottom-right-radius: 12px;
-            padding: 4px 25px;
-            cursor: pointer;
-            z-index: 2001;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .header-toggle-tab:hover {
-            padding-top: 8px;
-            background: var(--primary-color);
         }
 
         .header-bar {
@@ -1296,7 +1329,8 @@
         <symbol id="icon-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
     </svg>
 
-    <button class="header-toggle-tab" onclick="toggleHeader()">
+    <!-- ===== HEADER TOGGLE BUTTON – small, floating, mobile-only ===== -->
+    <button class="header-toggle-tab" onclick="toggleHeader()" aria-label="Toggle header">
         <svg class="icon" id="headerToggleIcon"><use href="#icon-chevron-up"/></svg>
     </button>
 
@@ -1315,7 +1349,6 @@
             <button class="theme-toggle-btn" onclick="randomizeTheme()" title="Change Theme">
                 <svg class="icon"><use href="#icon-palette"/></svg>
             </button>
-            <!-- Language toggle removed -->
             <div id="cloudSyncStatus" class="sync-status idle" title="Cloud Sync Active">
                 <svg class="icon sync-icon-svg" id="cloudIcon" style="width:24px;height:24px;"><use href="#icon-cloud"/></svg>
             </div>
@@ -1323,7 +1356,6 @@
                 <div id="todayDate" style="font-size:13px; line-height:1.6; font-weight:600; background:rgba(255,255,255,0.12); padding:4px 12px; border-radius:20px; display:inline-block; margin-bottom:4px;"></div>
                 <div style="margin-top: 5px;"><span>24 Carat:</span> <span id="liveGoldPrice24ct" class="live-price">--</span></div>
                 <div style="margin-top: 5px;"><span>22 Carat:</span> <span id="liveGoldPrice22ct" class="live-price">--</span></div>
-                <!-- Live price button removed -->
             </div>
         </div>
     </div>
@@ -1336,7 +1368,7 @@
 
     <div class="container">
         <div class="tab-buttons">
-            <a href="/axt" class="tab-button" target="_blank" style="text-decoration: none; color: inherit;">
+            <a href="/sell" class="tab-button" target="_blank" style="text-decoration: none; color: inherit;">
                 <svg class="icon"><use href="#icon-calculator"/></svg> AxT
             </a>
             <button class="tab-button active" onclick="openTab('profit')"><svg class="icon"><use href="#icon-sale"/></svg><span>Buy/Sell</span></button>
@@ -1435,7 +1467,7 @@
                             <option value="fixed">Fixed (₹)</option>
                         </select>
                     </div>
-                    <div><label>Making Charge Value</label><input id="otn_makingChargeValue" type="number" step="0.1" value="9.99" min="0" /></div>
+                    <div><label>Making Charge Value</label><input id="otn_makingChargeValue" type="number" step="0.1" value="12.99" min="0" /></div>
                     <div><label>GST (%)</label><input id="otn_GstPercent" type="number" step="0.1" value="3" min="0" /></div>
                 </div>
 
@@ -1576,7 +1608,7 @@
             </div>
         </div>
 
-        <!-- ======================== GOLD LOAN ======================== -->
+        <!-- ======================== GOLD LOAN (modified) ======================== -->
         <div id="loan" class="tab-pane">
             <div class="card">
                 <h3><svg class="icon"><use href="#icon-loan"/></svg> <span>Gold Loan Calculator</span></h3>
@@ -1648,7 +1680,9 @@
                     </div>
                     <div>
                         <label>Advance Given (If any)</label>
-                        <input type="number" id="gl_advance" placeholder="0">
+                        <input type="text" id="gl_advance" placeholder="0  (e.g. 100+100)" style="width:100%;">
+                        <div style="font-size:11px; color:#64748b; margin-top:4px; font-style:italic;">
+                        </div>
                     </div>
                     <button class="btn" onclick="gl_handleCalculateAndSave()" style="margin-top:0;" id="gl_manualCalcBtn">📊 Calculate</button>
                 </div>
@@ -1711,13 +1745,22 @@
                     <button class="btn btn-alt" style="margin: 0;" onclick="gl_confirmReset()">♻ Reset</button>
                 </div>
 
-                <!-- ====== HISTORY TOGGLE ====== -->
+                <!-- ====== HISTORY TOGGLE + SEARCH ====== -->
                 <div style="margin-top: 28px; border-top: 1px dashed #cbd5e1; padding-top: 20px;">
                     <button class="history-toggle-btn" onclick="gl_toggleHistory()">
                         <svg class="icon"><use href="#icon-folder"/></svg>
                         <span id="gl_historyToggleText">📂 Show Saved Accounts</span>
                         <span class="badge-count" id="gl_historyCount">0</span>
                     </button>
+
+                    <!-- Search input for filtering accounts -->
+                    <div id="gl_searchWrapper" style="display: none; margin-top: 12px; position: relative;">
+                        <input type="text" id="gl_searchInput" placeholder="🔍 Search by name or mobile..." 
+                               style="width: 100%; padding: 10px 40px 10px 16px; border-radius: 8px; border: 1px solid #cbd5e1; background: #fff; font-size: 14px;">
+                        <button id="gl_clearSearch" style="position: absolute; right: 6px; top: 50%; transform: translateY(-50%); 
+                               background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer; padding: 6px;">✕</button>
+                    </div>
+
                     <div id="gl_accountListWrapper" class="account-list-wrapper hidden-list">
                         <div id="gl_savedAccountsList" class="account-list">
                         </div>
@@ -1942,9 +1985,6 @@
         function t(key) {
             return (translations.en && translations.en[key]) ? translations.en[key] : key;
         }
-
-        // Remove switchLang function - no longer needed
-        // We keep only the translation function
 
         // ============================================================
         //  DATE DISPLAY (ENGLISH + BENGALI NUMERIC FORMAT) - keeping as is
@@ -3490,7 +3530,7 @@
             $('#otn_NewType').value = 'Licence';
             $('#otn_BasePrice24ct').value = '140000';
             $('#otn_makingChargeType').value = 'percent';
-            $('#otn_makingChargeValue').value = '9.99';
+            $('#otn_makingChargeValue').value = '12.99';
             $('#otn_GstPercent').value = '3';
             otn_calculateOldToNew();
         }
@@ -3534,20 +3574,30 @@
             }
         }
 
-        // ====== ACCOUNT LIST: newest first (sorted by id descending) ======
-        function gl_loadAccountList() {
+        // ====== ACCOUNT LIST: newest first (sorted by id descending) with SEARCH ======
+        function gl_loadAccountList(filterText = '') {
             const listContainer = document.getElementById('gl_savedAccountsList');
             const saved = localStorage.getItem('soleman_loan_accounts');
             const accounts = saved ? JSON.parse(saved) : [];
 
+            // Sort newest first
             accounts.sort((a, b) => b.id - a.id);
 
-            if (accounts.length === 0) {
-                listContainer.innerHTML = `<p style="text-align:center;color:#666;">${t('noSavedAccounts')}</p>`;
-                updateHistoryBadge(0);
+            // Filter by name or mobile if filterText provided
+            const filtered = filterText.trim() !== '' 
+                ? accounts.filter(acc => 
+                    (acc.name || '').toLowerCase().includes(filterText.toLowerCase()) ||
+                    (acc.mobile || '').includes(filterText)
+                  )
+                : accounts;
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<p style="text-align:center;color:#666;">${filterText.trim() !== '' ? 'No matching accounts found' : t('noSavedAccounts')}</p>`;
+                updateHistoryBadge(filtered.length);
                 return;
             }
-            listContainer.innerHTML = accounts.map(acc => {
+
+            listContainer.innerHTML = filtered.map(acc => {
                 let nameDisplay = acc.name || 'N/A';
                 let calcTime = acc.lastCalculated ? new Date(acc.lastCalculated).toLocaleString(getLocale(), {
                     hour: '2-digit',
@@ -3557,7 +3607,6 @@
                     year: 'numeric'
                 }) : 'N/A';
 
-                // Build stats grid
                 let statsHtml = '';
                 const calcResult = acc.calculationResult;
                 if (calcResult && calcResult.durationText && calcResult.durationText !== '-') {
@@ -3585,7 +3634,6 @@
                     statsHtml = `<div class="no-calc-data">${t('noCalcData')}</div>`;
                 }
 
-                // *************** DELETE BUTTON ADDED ***************
                 return `
                         <div class="account-item">
                             <div class="account-header">
@@ -3602,10 +3650,9 @@
                         </div>
                     `;
             }).join('');
-            updateHistoryBadge(accounts.length);
+            updateHistoryBadge(filtered.length);
         }
 
-        // ====== DELETE ACCOUNT FUNCTION ======
         function gl_deleteAccount(id) {
             customConfirm(t('confirmDel'), () => {
                 const saved = localStorage.getItem('soleman_loan_accounts');
@@ -3614,7 +3661,6 @@
                 localStorage.setItem('soleman_loan_accounts', JSON.stringify(accounts));
                 gl_loadAccountList();
                 showToast(t('loanAccDeleted'));
-                // If the deleted account was the currently loaded one, reset the view
                 if (gl_currentAccountId === id) {
                     gl_executeReset();
                 }
@@ -3904,7 +3950,7 @@
                 discountCard.style.display = 'none';
             }
 
-            const advanceInputStr = document.getElementById('gl_advance').value;
+            const advanceInputStr = document.getElementById('gl_advance').value.trim();
             const advanceAmount = parseFloat(advanceInputStr) || 0;
             const finalPayableNum = grandTotalNum - advanceAmount;
 
@@ -4201,20 +4247,36 @@
             setTimeout(() => { printWindow.print(); }, 500);
         }
 
-        // =============== HISTORY TOGGLE ===============
+        // =============== HISTORY TOGGLE WITH SEARCH ===============
         function gl_toggleHistory() {
             const wrapper = document.getElementById('gl_accountListWrapper');
             const btnText = document.getElementById('gl_historyToggleText');
+            const searchWrapper = document.getElementById('gl_searchWrapper');
 
             if (wrapper.classList.contains('hidden-list')) {
                 wrapper.classList.remove('hidden-list');
                 wrapper.classList.add('visible-list');
                 btnText.innerHTML = '📂 ' + t('hideHistory');
-                gl_loadAccountList();
+                searchWrapper.style.display = 'block';
+                gl_loadAccountList(); // load all initially
+                // set up search listener
+                const searchInput = document.getElementById('gl_searchInput');
+                const clearBtn = document.getElementById('gl_clearSearch');
+                searchInput.value = '';
+                searchInput.oninput = function() {
+                    gl_loadAccountList(this.value);
+                };
+                clearBtn.onclick = function() {
+                    searchInput.value = '';
+                    gl_loadAccountList('');
+                    searchInput.focus();
+                };
             } else {
                 wrapper.classList.remove('visible-list');
                 wrapper.classList.add('hidden-list');
                 btnText.innerHTML = '📂 ' + t('showHistory');
+                searchWrapper.style.display = 'none';
+                document.getElementById('gl_searchInput').value = '';
             }
         }
 
@@ -4244,6 +4306,57 @@
                 }
             });
         }
+
+        // ====== NEW: Advance Given – Math Expression Support ======
+        (function setupAdvanceMath() {
+            const advInput = document.getElementById('gl_advance');
+            if (!advInput) return;
+
+            advInput.type = 'text';
+            advInput.placeholder = '0';
+
+            function safeEval(expr) {
+                if (!/^[\d+\-*/.\s]+$/.test(expr)) return null;
+                try {
+                    const result = Function('"use strict"; return (' + expr + ')')();
+                    if (typeof result === 'number' && isFinite(result)) {
+                        return result;
+                    }
+                } catch (_) { /* ignore */ }
+                return null;
+            }
+
+            advInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const raw = this.value.trim();
+                    if (raw === '') {
+                        this.value = '0';
+                        if (typeof gl_calculateInterest === 'function') gl_calculateInterest();
+                        return;
+                    }
+
+                    const asNumber = parseFloat(raw);
+                    if (!isNaN(asNumber) && isFinite(asNumber) && /^[\d.]+$/.test(raw)) {
+                        if (typeof gl_calculateInterest === 'function') gl_calculateInterest();
+                        return;
+                    }
+
+                    const result = safeEval(raw);
+                    if (result !== null) {
+                        const rounded = Math.round(result * 100) / 100;
+                        this.value = String(rounded);
+                        if (typeof gl_calculateInterest === 'function') {
+                            gl_calculateInterest();
+                        }
+                    } else {
+                        if (typeof showToast === 'function') {
+                            showToast('Invalid expression. Use +, -, *, /');
+                        }
+                    }
+                }
+            });
+        })();
 
         let serverSaveDebounceTimer;
 
@@ -4659,7 +4772,6 @@
             const otnModal = $('#otn_bill-preview-modal');
             otnModal.onclick = (event) => { if (event.target === otnModal) { otnModal.style.display = 'none'; } };
 
-            // Initialize history toggle state
             const wrapper = document.getElementById('gl_accountListWrapper');
             wrapper.classList.add('hidden-list');
             wrapper.classList.remove('visible-list');
