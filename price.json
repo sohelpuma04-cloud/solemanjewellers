@@ -1,7 +1,7 @@
 {
-    "goldPrice": "146000",
-    "oldGoldPriceGeneral": "136000",
-    "oldSilverPrice": "1500",
-    "oldGoldPriceNakmachi": "",
-    "newSilverPrice": "1500"
+    "goldPrice": 140000,
+    "oldGoldPriceGeneral": 138000,
+    "oldGoldPriceNakmachi": 90000,
+    "newSilverPrice": 2050,
+    "oldSilverPrice": 1700
 }
